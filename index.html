@@ -1,0 +1,1028 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Silk Road Traders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Young+Serif&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: a caravan ledger. Lapis ink on cool sand, each region keeps its own dye colour.
+   Teacher view = projected map + trade feed. Group view = hand of cards + one action panel. */
+:root{
+  --bg:#ECEFF3; --surface:#FFFFFF; --surface-2:#F5F7FA; --ink:#17203A; --muted:#58617A; --line:#D3D9E3;
+  --accent:#233F99; --accent-ink:#FFFFFF; --saffron:#C98A12; --good:#2D7A45; --bad:#B23A2E;
+  --byzantium:#7A3E8E; --arabia:#0F7676; --persia:#2F55B8; --india:#2E7F3E; --centralAsia:#A86B12; --china:#B3362C;
+  --shadow:0 1px 2px rgba(23,32,58,.06),0 4px 14px rgba(23,32,58,.06);
+  --f-display:"Young Serif",Georgia,"Times New Roman",serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1322; --surface:#171E33; --surface-2:#1D2540; --ink:#E7EBF5; --muted:#9BA4BB; --line:#2B3555;
+  --accent:#8FA7F2; --accent-ink:#0E1322; --saffron:#E6B341; --good:#5FBF7C; --bad:#F07A6C;
+  --byzantium:#B585C6; --arabia:#3DBDB8; --persia:#7C9CF0; --india:#6CC27D; --centralAsia:#E0A445; --china:#EE7468;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0E1322; --surface:#171E33; --surface-2:#1D2540; --ink:#E7EBF5; --muted:#9BA4BB; --line:#2B3555;
+  --accent:#8FA7F2; --accent-ink:#0E1322; --saffron:#E6B341; --good:#5FBF7C; --bad:#F07A6C;
+  --byzantium:#B585C6; --arabia:#3DBDB8; --persia:#7C9CF0; --india:#6CC27D; --centralAsia:#E0A445; --china:#EE7468;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark;}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;line-height:1.15;text-wrap:balance;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--saffron);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:20px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:.55em 1.1em;font-weight:700;display:inline-flex;align-items:center;gap:.4em}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.small{padding:.3em .8em;font-size:.88rem}
+.btn.danger{color:var(--bad);border-color:currentColor;background:transparent}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.eyebrow{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);min-width:0}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+ol.qs{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:.35em;border-radius:999px;padding:.1em .6em;font-size:.8rem;font-weight:700;border:1px solid var(--line);background:var(--surface-2)}
+.dot{width:.75em;height:.75em;border-radius:50%;background:var(--rc,var(--accent));display:inline-block;flex:none}
+.glyph{width:1.1em;height:1.1em;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- landing ---------- */
+.hero{display:grid;gap:8px;padding-block:28px 18px}
+.hero h1{font-size:clamp(2.2rem,6vw,3.6rem)}
+.hero p{max-width:60ch;margin:0;color:var(--muted);font-size:1.08rem}
+.road{height:10px;border-radius:999px;background:linear-gradient(90deg,var(--byzantium) 0 16.6%,var(--arabia) 0 33.3%,var(--persia) 0 50%,var(--india) 0 66.6%,var(--centralAsia) 0 83.3%,var(--china) 0);max-width:520px}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px}
+.choices .panel h2{font-size:1.5rem}
+.codein{font:700 2rem/1 var(--f-mono);letter-spacing:.3em;text-transform:uppercase;width:100%;max-width:9.5em;padding:.35em .4em;border:2px solid var(--line);border-radius:var(--r);background:var(--surface-2);color:var(--ink)}
+.switch{display:flex;gap:.6em;align-items:flex-start;cursor:pointer}
+.switch input{width:1.2em;height:1.2em;margin-top:.15em;accent-color:var(--accent)}
+.foot{font-size:.88rem;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* ---------- region picker ---------- */
+.regions{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px}
+.rtile{text-align:left;border:2px solid var(--line);border-radius:var(--r);background:var(--surface);padding:14px;display:flex;flex-direction:column;gap:6px;border-top:8px solid var(--rc)}
+.rtile:hover{border-color:var(--rc)}
+.rtile h3{font-size:1.35rem}
+.rtile.taken{opacity:.7}
+
+/* ---------- cards ---------- */
+.kinds{display:flex;flex-direction:column;gap:14px}
+.kind-row h3{font-family:var(--f-body);font-weight:700;font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;gap:.4em;align-items:center;margin-bottom:6px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow);position:relative;min-width:0}
+.card .band{height:8px;background:var(--oc)}
+.card .body{padding:8px 10px 10px;display:flex;flex-direction:column;gap:3px;flex:1}
+.card .name{font-family:var(--f-display);font-size:1.15rem;line-height:1.15}
+.card .desc{font-size:.8rem;color:var(--muted);line-height:1.35}
+.card .from{margin-top:auto;padding-top:6px;font-size:.75rem;font-weight:700;color:var(--oc);display:flex;gap:.35em;align-items:center}
+.card .qty{position:absolute;top:14px;right:8px;font:700 .85rem var(--f-mono);background:var(--ink);color:var(--surface);border-radius:999px;padding:0 .5em}
+.card.foreign::after{content:"+ from afar";position:absolute;top:14px;left:8px;font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--oc)}
+.card.foreign .name{margin-top:14px}
+.card.disease{--oc:var(--bad);background:repeating-linear-gradient(135deg,var(--surface) 0 10px,var(--surface-2) 10px 20px)}
+.card.disease::after{content:"secret";position:absolute;top:14px;left:8px;font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--bad)}
+.card.disease .name{margin-top:14px}
+
+/* ---------- group screen ---------- */
+.gbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:4px solid var(--rc);box-shadow:var(--shadow)}
+.gbar .wrap{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding-block:10px}
+.gbar h1{font-size:1.6rem;color:var(--rc)}
+.gbar .spacer{flex:1}
+.timer{font:700 1.3rem var(--f-mono);font-variant-numeric:tabular-nums;padding:.1em .5em;border-radius:8px;background:var(--surface-2);border:1px solid var(--line)}
+.timer:empty{display:none}
+.timer.out{color:var(--bad);border-color:var(--bad)}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:8px 12px;min-width:110px}
+.stat b{font:700 1.4rem var(--f-mono);font-variant-numeric:tabular-nums}
+.stat span{font-size:.78rem;color:var(--muted)}
+.stat.warn b{color:var(--bad)} .stat.ok b{color:var(--good)}
+.gmain{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:860px){.gmain{grid-template-columns:1fr}}
+.side{position:sticky;top:90px}
+@media (max-width:860px){.side{position:static;order:-1}}
+.side h2{font-size:1.4rem}
+.partners{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.ptn{border:2px solid var(--line);background:var(--surface-2);border-radius:var(--r);padding:8px 10px;text-align:left;display:flex;flex-direction:column;gap:2px;border-left:6px solid var(--rc)}
+.ptn.on{border-color:var(--rc);background:var(--surface)}
+.ptn small{color:var(--muted);font-size:.75rem}
+.ptn:disabled{opacity:.5}
+.picker{display:flex;flex-direction:column;gap:4px;max-height:280px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px;background:var(--surface-2)}
+.pick{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;padding:4px 6px;border-radius:6px;background:var(--surface)}
+.pick .nm{font-weight:700;font-size:.92rem;overflow-wrap:anywhere}
+.pick .nm small{display:block;font-weight:400;color:var(--muted);font-size:.72rem}
+.step{display:flex;align-items:center;gap:4px}
+.step button{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--surface-2);font-weight:700}
+.step output{font:700 1rem var(--f-mono);min-width:1.6em;text-align:center}
+.step output.on{color:var(--accent)}
+.offer{border:1px solid var(--line);border-left:6px solid var(--rc);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px;background:var(--surface-2)}
+.offer .terms{font-size:.95rem}
+.offer .terms b{font-weight:700}
+.status{font-size:.8rem;font-weight:700}
+.status.accepted{color:var(--good)} .status.declined,.status.failed,.status.cancelled{color:var(--bad)}
+.news{border:2px solid var(--rc);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.news .head{background:var(--rc);color:#fff;padding:10px 14px}
+.news .head .eyebrow{color:rgba(255,255,255,.85)}
+.news .head h2{color:#fff}
+.news .inner{padding:14px;display:flex;flex-direction:column;gap:10px}
+.effect{font-weight:700;border-left:4px solid var(--saffron);padding-left:10px}
+.score-lines{display:flex;flex-direction:column;gap:4px;font-size:.95rem}
+.score-lines div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding-block:3px}
+.score-lines .pts{font:700 1rem var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pts.neg{color:var(--bad)} .pts.pos{color:var(--good)}
+.score-total{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--f-display);font-size:1.6rem}
+.big-total{font:700 3rem var(--f-mono);color:var(--accent)}
+.modal{border:2px solid var(--saffron);background:var(--surface);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
+
+/* ---------- host ---------- */
+.hbar{background:var(--surface);border-bottom:1px solid var(--line)}
+.hbar .wrap{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding-block:12px}
+.hbar h1{font-size:1.5rem}
+.codebox{display:flex;flex-direction:column;align-items:flex-start;line-height:1.1}
+.codebox b{font:700 2.4rem var(--f-mono);letter-spacing:.18em;color:var(--accent)}
+.steps{display:flex;gap:4px;flex-wrap:wrap}
+.steps span{font-size:.8rem;font-weight:700;padding:.3em .7em;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.steps span.done{color:var(--ink);background:var(--surface-2)}
+.steps span.now{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.hgrid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.hgrid{grid-template-columns:1fr}}
+.mapbox{overflow-x:auto}
+.mapbox svg{width:100%;min-width:640px;height:auto;display:block}
+.feed{display:flex;flex-direction:column;gap:6px;max-height:520px;overflow:auto}
+.feed .item{font-size:.9rem;padding:6px 8px;border-radius:6px;background:var(--surface-2);border-left:4px solid var(--rc)}
+.feed .item small{color:var(--muted);display:block;font-size:.72rem}
+.rstat{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.rstat .r{border:1px solid var(--line);border-top:5px solid var(--rc);border-radius:8px;padding:8px 10px;background:var(--surface);font-size:.85rem}
+.rstat .r b{display:block;font-family:var(--f-display);font-weight:400;font-size:1.05rem}
+.board{display:flex;flex-direction:column;gap:8px}
+.board .line{display:grid;grid-template-columns:2.2em minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 12px;border-radius:8px;background:var(--surface-2);border-left:6px solid var(--rc)}
+.board .rank{font:700 1.3rem var(--f-mono)}
+.board .tot{font:700 1.6rem var(--f-mono);font-variant-numeric:tabular-nums}
+.board details summary{cursor:pointer;font-family:var(--f-display);font-size:1.15rem}
+.conn{font-size:.8rem;font-weight:700;display:inline-flex;gap:.4em;align-items:center}
+.conn::before{content:"";width:.6em;height:.6em;border-radius:50%;background:var(--muted)}
+.conn.live::before{background:var(--good)} .conn.bad::before{background:var(--bad)} .conn.poll::before{background:var(--saffron)}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:20;background:var(--ink);color:var(--surface);padding:12px 18px;border-radius:12px;font-weight:700;max-width:min(92vw,520px);box-shadow:var(--shadow)}
+.toast.bad{background:var(--bad);color:#fff}
+.toast:empty{display:none}
+@media (prefers-reduced-motion:no-preference){
+  .trade-line{animation:draw 1.2s ease-out both}
+  @keyframes draw{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>
+/* =====================================================================
+   SETTINGS: paste your Firebase Realtime Database URL here (no trailing slash).
+   ===================================================================== */
+const FIREBASE_DB_URL = "https://finding-out-expedition-default-rtdb.europe-west1.firebasedatabase.app";
+const DB_ROOT = "silkroad";
+
+/* ============================ GAME DATA ============================ */
+const REGIONS = {
+  byzantium:  {name:"Byzantium",    zone:"west",   blurb:"Rich city of Constantinople. Glass, gold, olive oil."},
+  arabia:     {name:"Arabia",       zone:"west",   blurb:"Clever traders and scholars. Dyes, copper, new ideas. No food!"},
+  persia:     {name:"Persia",       zone:"middle", blurb:"Right in the middle of the road. Wool, dates, blue lapis stone."},
+  india:      {name:"India",        zone:"middle", blurb:"Spices, cotton and medicine. Home of two big religions."},
+  centralAsia:{name:"Central Asia", zone:"east",   blurb:"Horse riders of the grasslands. Horses, saddles, animals."},
+  china:      {name:"China",        zone:"east",   blurb:"Land of silk and new inventions. Rice, silk, paper money."}
+};
+const ORDER = ["byzantium","arabia","persia","india","centralAsia","china"];
+const ZONES = {west:{name:"West",i:0}, middle:{name:"Middle",i:1}, east:{name:"East",i:2}};
+const KINDS = {
+  food:  {label:"Food"},
+  goods: {label:"Goods"},
+  tech:  {label:"Technology"},
+  belief:{label:"Belief"},
+  disease:{label:"Disease"}
+};
+const KIND_ORDER = ["food","goods","tech","belief","disease"];
+const GOODS = {
+  rice:{name:"Rice",kind:"food",desc:"Grows in wet fields. Feeds millions."},
+  wheat:{name:"Wheat",kind:"food",desc:"Ground into flour for bread and noodles."},
+  silk:{name:"Silk",kind:"goods",desc:"Smooth, shiny cloth. Only China knew how to make it."},
+  ginger:{name:"Ginger",kind:"goods",desc:"A spicy root used in food and medicine."},
+  paper:{name:"Paper money",kind:"tech",desc:"Much lighter to carry than a sack of coins."},
+  gunpowder:{name:"Gunpowder",kind:"tech",desc:"Invented in China. First used for fireworks."},
+  confucianism:{name:"Confucianism",kind:"belief",desc:"Respect your family, elders and teachers."},
+  taoism:{name:"Taoism",kind:"belief",desc:"Live simply and in balance with nature."},
+  livestock:{name:"Livestock",kind:"food",desc:"Sheep and goats for meat and milk."},
+  horses:{name:"Horses",kind:"goods",desc:"Fast, strong horses. China wanted them badly."},
+  hides:{name:"Animal hides",kind:"goods",desc:"Leather for tents, boots and bags."},
+  saddles:{name:"Saddles & stirrups",kind:"tech",desc:"Help riders stay steady on a galloping horse."},
+  animism:{name:"Animism",kind:"belief",desc:"Spirits live in nature: rivers, mountains, animals."},
+  barley:{name:"Barley",kind:"food",desc:"A hardy grain for bread and porridge."},
+  pepper:{name:"Pepper",kind:"goods",desc:"A hot spice worth a lot of money."},
+  spices:{name:"Spices",kind:"goods",desc:"Cinnamon and cardamom make food delicious."},
+  cotton:{name:"Cotton",kind:"goods",desc:"Soft, cool cloth for hot weather."},
+  medicine:{name:"Medicine",kind:"tech",desc:"Herbal cures from Indian healers."},
+  hinduism:{name:"Hinduism",kind:"belief",desc:"Many gods, and the belief in rebirth."},
+  buddhism:{name:"Buddhism",kind:"belief",desc:"Follow the Buddha's path to end suffering."},
+  grain:{name:"Grain",kind:"food",desc:"Stored in big jars to last all year."},
+  dates:{name:"Dates",kind:"food",desc:"Sweet fruit that keeps for a long time."},
+  wool:{name:"Wool",kind:"goods",desc:"Warm cloth, perfect for carpets."},
+  lapis:{name:"Lapis lazuli",kind:"goods",desc:"A deep blue stone for jewellery and paint."},
+  metalwork:{name:"Metalwork salts",kind:"tech",desc:"Ammonium chloride helps clean and join metals."},
+  zoroastrianism:{name:"Zoroastrianism",kind:"belief",desc:"Good thoughts, good words, good deeds."},
+  dyes:{name:"Dyes",kind:"goods",desc:"Bright colours for cloth."},
+  copper:{name:"Copper",kind:"goods",desc:"Metal for pots, tools and coins."},
+  algebra:{name:"Algebra",kind:"tech",desc:"A new way of solving maths puzzles."},
+  maps:{name:"Map-making",kind:"tech",desc:"Maps and stars to find your way."},
+  medical:{name:"Hospitals",kind:"tech",desc:"New ways to care for sick people."},
+  islam:{name:"Islam",kind:"belief",desc:"Belief in one God and the Prophet Muhammad."},
+  olive:{name:"Olive oil",kind:"food",desc:"For cooking, lamps and soap."},
+  grapes:{name:"Grapes",kind:"food",desc:"Juicy fruit grown on sunny hills."},
+  glass:{name:"Glass",kind:"goods",desc:"Beautiful glass bowls and beads."},
+  gold:{name:"Gold",kind:"goods",desc:"Shiny coins and jewellery."},
+  glassmaking:{name:"Glass-making",kind:"tech",desc:"The secret of making clear glass."},
+  orthodox:{name:"Orthodox Christianity",kind:"belief",desc:"The Christian church of Constantinople."},
+  disease:{name:"Disease",kind:"disease",desc:"Germs travel with traders. Pass it on secretly!"}
+};
+const START = {
+  china:{rice:2,wheat:2,silk:3,ginger:1,paper:1,gunpowder:1,confucianism:1,taoism:1},
+  centralAsia:{livestock:3,horses:3,hides:2,saddles:2,animism:2},
+  india:{barley:2,wheat:1,pepper:2,spices:1,cotton:2,medicine:2,hinduism:1,buddhism:1},
+  persia:{grain:2,dates:2,wool:2,lapis:2,metalwork:2,zoroastrianism:2},
+  arabia:{dyes:3,copper:3,algebra:1,maps:1,medical:2,islam:2},
+  byzantium:{olive:2,grapes:2,glass:2,gold:3,glassmaking:1,orthodox:2}
+};
+const PHASES = ["lobby","r1","r2","news2","r3","news3","final"];
+const PHASE_LABEL = {lobby:"Lobby",r1:"Round 1",r2:"Round 2",news2:"News #2",r3:"Round 3",news3:"News #3",final:"Results"};
+const PHASE_INFO = {
+  lobby:{title:"Get into your regional groups",text:"Each group opens this page on one device, types the game code and picks its region.",next:"Start Round 1"},
+  r1:{title:"Round 1: Know your region",text:"No trading with other regions yet. Look at your cards together and share out who looks after each kind of card.",
+      q:["What do you have lots of?","What are you missing?","Which cards do you need to survive? Which ones are extras?"],next:"Start Round 2 (trading)"},
+  r2:{title:"Round 2: Trade with your neighbour",text:"You can only trade with the other region in your zone. Try to get rid of your disease card without anyone noticing!",
+      q:["Was it hard to agree on a deal?","Did you swap one card for one card, or try for a better deal?","Did you manage to pass on your disease card?"],next:"End trading, share News #2"},
+  news2:{title:"News arrives!",text:"Every region has a news card on its screen. Read it together. It changes your plan for Round 3.",
+      q:["How does your news change your plan for Round 3?","What new ideas or beliefs have you seen so far?"],next:"Start Round 3"},
+  r3:{title:"Round 3: The long road",text:"Now you can also trade with the zone next door. The West and the East are too far apart to trade directly, so they need a Middle region to pass goods along.",
+      q:["Which region helped you as a middle trader?","What did the middle trader want in return?"],next:"End trading, share final news"},
+  news3:{title:"Final news and scores",text:"Every region has one last news card. Your scores are on your screens.",
+      q:["Did your news card help or hurt your score? Why?","Which new technology would improve your life the most?"],next:"Show results"},
+  final:{title:"Wrapping up",text:"Compare the scores, then talk about what the game showed.",
+      q:["Why did disease cards spread along with trade?","How do beliefs travel when merchants trade?","Why were the Middle regions so important?","How did the Silk Roads change what people ate, wore and believed?"]}
+};
+const NEWS2 = {
+  china:{title:"The emperor wants silk",story:"The emperor now collects taxes in silk. Families spend more time making silk and less time farming.",effect:"Pay your tax now: give up one food or goods card. Good news: any gold you collect will be worth double at the end."},
+  centralAsia:{title:"More mouths to feed",story:"Your population is growing and you rule more land than ever.",effect:"At the end you need 3 food cards instead of 2. China seems to have plenty of food!"},
+  india:{title:"More mouths to feed",story:"More people live in India and more land is under your control.",effect:"At the end you need 3 food cards instead of 2."},
+  persia:{title:"In the middle of the road",story:"Persia sits right in the middle of the Silk Roads. Everyone has to pass through.",effect:"In Round 3 you earn 1 bonus point for every trade you make. Be the middle merchant!"},
+  arabia:{title:"Your ideas are spreading",story:"Traders are carrying Arabian ideas and beliefs along the routes.",effect:"At the end you earn 1 bonus point for every Arabian technology or belief card that another region holds. And remember: you still need food!"},
+  byzantium:{title:"Everyone wants your gold",story:"Stories of your glass and gold are spreading. China really wants your gold.",effect:"Any silk you collect will be worth double at the end."}
+};
+const NEWS3 = {
+  china:{title:"The silk secret is out",story:"People across Eurasia have learned how to make silk. It is not so special any more.",effect:"Lose 1 point for every silk card you still have."},
+  centralAsia:{title:"A giant empire",story:"Your lands now stretch across most of the Silk Roads. You must feed everyone.",effect:"Every food card is worth 2 points, wherever it came from."},
+  india:{title:"Monasteries along the road",story:"Your leaders are building Buddhist monasteries along the trade routes.",effect:"Belief cards from other regions are worth double."},
+  persia:{title:"Luxury lovers",story:"Byzantium and Arabia rely on you for luxury goods from far away.",effect:"Goods cards from other regions are worth double."},
+  arabia:{title:"Pilgrims and growing cities",story:"Your cities are growing and pilgrims travel to Mecca from far away.",effect:"Every belief card is worth 2 points, wherever it came from."},
+  byzantium:{title:"Rich, but in danger",story:"Your wealth makes you a target for invaders. Silk is changing how people dress.",effect:"Lose 1 point for every gold card you still have. Silk still counts double."}
+};
+const RULES_TEXT = [
+  "+1 point for each card from another region.",
+  "+2 points if you hold all four kinds: food, goods, technology and belief.",
+  "You need at least 2 food cards to survive, or you lose 3 points.",
+  "Each disease card you hold at the end: minus 2 points.",
+  "News cards in Rounds 2 and 3 can change these rules!"
+];
+
+/* ============================ HELPERS ============================ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const rid = (n=8) => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => "abcdefghijkmnpqrstuvwxyz23456789"[b%32]).join("");
+const pIdx = p => PHASES.indexOf(p);
+const rc = r => `var(--${r})`;
+function setPath(obj, path, val){
+  const parts = String(path).split("/").filter(Boolean);
+  if(!parts.length) return val;
+  let o = obj;
+  for(let i=0;i<parts.length-1;i++){
+    if(o[parts[i]] == null || typeof o[parts[i]] !== "object") o[parts[i]] = {};
+    o = o[parts[i]];
+  }
+  const k = parts[parts.length-1];
+  if(val === null || val === undefined) delete o[k]; else o[k] = val;
+  return obj;
+}
+function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+function clientId(){ let c = lsGet("silkroad-client"); if(!c){ c = rid(10); lsSet("silkroad-client", c); } return c; }
+
+const ICON = {
+  food:'<path d="M12 21V9"/><path d="M12 9c-3 0-4.5-2-4.5-4.5C10.5 4.5 12 6.5 12 9z"/><path d="M12 9c3 0 4.5-2 4.5-4.5C13.5 4.5 12 6.5 12 9z"/><path d="M12 14.5c-3 0-4.5-2-4.5-4.5 3 0 4.5 2 4.5 4.5z"/><path d="M12 14.5c3 0 4.5-2 4.5-4.5-3 0-4.5 2-4.5 4.5z"/>',
+  goods:'<path d="M4 8.5 12 4l8 4.5v7.5L12 20.5 4 16z"/><path d="M4 8.5 12 13l8-4.5"/><path d="M12 13v7.5"/>',
+  tech:'<circle cx="12" cy="12" r="3.2"/><path d="M12 3v3.2M12 17.8V21M3 12h3.2M17.8 12H21M5.6 5.6l2.3 2.3M16.1 16.1l2.3 2.3M5.6 18.4l2.3-2.3M16.1 7.9l2.3-2.3"/>',
+  belief:'<path d="M12 3c3 3.8 5 6.2 5 10a5 5 0 0 1-10 0c0-3.8 2-6.2 5-10z"/><path d="M12 11c1.2 1.6 2 2.6 2 4a2 2 0 0 1-4 0c0-1.4.8-2.4 2-4z"/>',
+  disease:'<circle cx="12" cy="12" r="4.5"/><path d="M12 3v3.5M12 17.5V21M3 12h3.5M17.5 12H21M5.6 5.6l2.5 2.5M15.9 15.9l2.5 2.5M5.6 18.4l2.5-2.5M15.9 8.1l2.5-2.5"/>'
+};
+const glyph = k => `<svg class="glyph" viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
+
+/* ============================ RULES ============================ */
+function canTrade(phase, a, b){
+  if(!a || !b || a === b) return false;
+  const za = ZONES[REGIONS[a].zone].i, zb = ZONES[REGIONS[b].zone].i;
+  if(phase === "r2") return za === zb;
+  if(phase === "r3") return Math.abs(za - zb) <= 1;
+  return false;
+}
+function whyNot(phase, a, b){
+  if(phase !== "r2" && phase !== "r3") return "Trading is closed";
+  const za = ZONES[REGIONS[a].zone].i, zb = ZONES[REGIONS[b].zone].i;
+  if(phase === "r2") return "Not in your zone";
+  if(Math.abs(za-zb) > 1) return "Too far: trade through a Middle region";
+  return "";
+}
+function foodNeed(r){ return (r === "centralAsia" || r === "india") ? 3 : 2; }
+function handOf(d, r){ return Object.entries(d?.hands?.[r] || {}).map(([id,c]) => ({id, ...c})); }
+function tradeCount(d, r, phase){
+  return Object.values(d?.log || {}).filter(e => e.type === "trade" && e.phase === phase && (e.from === r || e.to === r)).length;
+}
+function arabiaSpread(d){
+  let n = 0;
+  for(const r of ORDER){ if(r === "arabia") continue;
+    for(const c of handOf(d, r)){ if(c.o === "arabia" && c.g !== "disease" && ["tech","belief"].includes(GOODS[c.g].kind)) n++; } }
+  return n;
+}
+function scoreRegion(d, r){
+  const hand = handOf(d, r), cards = hand.filter(c => c.g !== "disease"), dis = hand.length - cards.length;
+  const K = c => GOODS[c.g].kind, foreign = cards.filter(c => c.o !== r);
+  const lines = []; let total = 0;
+  const add = (label, pts) => { if(pts !== 0){ lines.push({label, pts}); total += pts; } };
+  add(`Cards from other regions (${foreign.length})`, foreign.length);
+  if(r === "china"){
+    const gold = foreign.filter(c => c.g === "gold").length; add(`Gold is worth double (${gold})`, gold);
+    const silk = cards.filter(c => c.g === "silk").length; add(`The silk secret is out (${silk})`, -silk);
+  }
+  if(r === "byzantium"){
+    const silk = foreign.filter(c => c.g === "silk").length; add(`Silk is worth double (${silk})`, silk);
+    const gold = cards.filter(c => c.g === "gold").length; add(`Invaders want your gold (${gold})`, -gold);
+  }
+  if(r === "centralAsia"){
+    const f = cards.filter(c => K(c) === "food"); add(`Every food card is worth 2 (${f.length})`, f.reduce((s,c) => s + (c.o === r ? 2 : 1), 0));
+  }
+  if(r === "india"){
+    const b = foreign.filter(c => K(c) === "belief").length; add(`Beliefs from afar count double (${b})`, b);
+  }
+  if(r === "persia"){
+    const g = foreign.filter(c => K(c) === "goods").length; add(`Goods from afar count double (${g})`, g);
+    const t = tradeCount(d, "persia", "r3"); add(`Middle merchant: trades in Round 3 (${t})`, t);
+  }
+  if(r === "arabia"){
+    const b = cards.filter(c => K(c) === "belief"); add(`Every belief card is worth 2 (${b.length})`, b.reduce((s,c) => s + (c.o === r ? 2 : 1), 0));
+    const s = arabiaSpread(d); add(`Your ideas spread (${s} held by other regions)`, s);
+  }
+  const food = cards.filter(c => K(c) === "food").length, need = foodNeed(r);
+  if(food < need) add(`Not enough food (${food} of ${need})`, -3);
+  const kinds = new Set(cards.map(K));
+  if(["food","goods","tech","belief"].every(k => kinds.has(k))) add("All four kinds of card", 2);
+  add(`Disease (${dis})`, -2 * dis);
+  return {total, lines, food, need, foreign: foreign.length, disease: dis};
+}
+function liveStats(d, r){
+  const hand = handOf(d, r), cards = hand.filter(c => c.g !== "disease");
+  const need = pIdx(d?.meta?.phase) >= pIdx("news2") ? foodNeed(r) : 2;
+  return {
+    total: cards.length,
+    food: cards.filter(c => GOODS[c.g].kind === "food").length, need,
+    foreign: cards.filter(c => c.o !== r).length,
+    disease: hand.length - cards.length
+  };
+}
+function dealHands(){
+  const hands = {};
+  for(const r of ORDER){
+    hands[r] = {}; let n = 0;
+    for(const [g, count] of Object.entries(START[r])) for(let i=0;i<count;i++) hands[r][`${r.slice(0,3)}${n++}`] = {g, o:r};
+    hands[r][`${r.slice(0,3)}X`] = {g:"disease", o:r};
+  }
+  return hands;
+}
+function stacks(cards){
+  const m = new Map();
+  for(const c of cards){ const k = `${c.g}|${c.o}`; if(!m.has(k)) m.set(k, {key:k, g:c.g, o:c.o, ids:[]}); m.get(k).ids.push(c.id); }
+  return [...m.values()].sort((a,b) => KIND_ORDER.indexOf(GOODS[a.g].kind) - KIND_ORDER.indexOf(GOODS[b.g].kind) || GOODS[a.g].name.localeCompare(GOODS[b.g].name) || a.o.localeCompare(b.o));
+}
+function listGoods(keys){
+  if(!keys || !keys.length) return "nothing";
+  const m = {}; keys.forEach(g => m[g] = (m[g]||0) + 1);
+  return Object.entries(m).map(([g,n]) => `${n} ${GOODS[g].name}`).join(", ");
+}
+
+/* ============================ STORE ============================ */
+function dbUrl(){ return (FIREBASE_DB_URL || "").replace(/\/+$/, ""); }
+function makeStore(mode, code){
+  const listeners = new Set(); let state = null, started = false;
+  const emit = () => listeners.forEach(f => f(state));
+  const api = { on(f){ listeners.add(f); return () => listeners.delete(f); } };
+  if(mode === "local"){
+    const key = "silkroad-local:" + code;
+    let bc = null; try{ bc = new BroadcastChannel("silkroad-" + code); }catch(e){}
+    const read = () => lsGet(key);
+    const load = () => { state = read(); emit(); };
+    const write = s => { lsSet(key, s); bc && bc.postMessage(1); load(); };
+    if(bc) bc.onmessage = load;
+    window.addEventListener("storage", e => { if(e.key === key) load(); });
+    Object.assign(api, {
+      start(){ if(!started){ started = true; load(); } },
+      async get(path){ const s = read(); if(!path) return s; return path.split("/").reduce((o,k) => o == null ? null : o[k], s) ?? null; },
+      async put(val){ write(val); },
+      async update(u){ const s = read() || {}; for(const [p,v] of Object.entries(u)) setPath(s, p, v); write(s); },
+      async remove(){ lsDel(key); bc && bc.postMessage(1); load(); },
+      stop(){ bc && bc.close(); }
+    });
+    setConn("local");
+    return api;
+  }
+  const base = `${dbUrl()}/${DB_ROOT}/${code}`;
+  let es = null, poll = null, fails = 0;
+  const startPolling = () => {
+    setConn("poll");
+    const tick = async () => { try{ const r = await fetch(base + ".json", {cache:"no-store"}); if(r.ok){ state = await r.json(); emit(); } }catch(e){} };
+    tick(); poll = setInterval(tick, 2000);
+  };
+  const req = async (method, path, body) => {
+    const r = await fetch(`${base}${path ? "/" + path : ""}.json`, {method, headers:{"Content-Type":"application/json"}, body: body === undefined ? undefined : JSON.stringify(body)});
+    if(!r.ok){ const err = new Error(r.status === 401 || r.status === 403 ? "denied" : "http " + r.status); err.status = r.status; throw err; }
+    if(poll){ const g = await fetch(base + ".json", {cache:"no-store"}); if(g.ok){ state = await g.json(); emit(); } }
+    return r;
+  };
+  Object.assign(api, {
+    start(){
+      if(started) return; started = true;
+      if(!("EventSource" in window)){ startPolling(); return; }
+      es = new EventSource(base + ".json");
+      es.onopen = () => { fails = 0; setConn("live"); };
+      es.addEventListener("put", e => { const {path, data} = JSON.parse(e.data); if(path === "/") state = data; else { state = state || {}; setPath(state, path, data); } emit(); });
+      es.addEventListener("patch", e => { const {path, data} = JSON.parse(e.data); state = state || {}; const pre = path === "/" ? "" : path.replace(/^\//, "") + "/"; for(const [k,v] of Object.entries(data || {})) setPath(state, pre + k, v); emit(); });
+      es.addEventListener("cancel", () => { setConn("bad"); toast("The database refused to share this game. Check the Firebase rules.", true); });
+      es.onerror = () => { fails++; if(fails >= 3 && !poll){ es.close(); es = null; startPolling(); } };
+    },
+    async get(path){ const r = await fetch(`${base}${path ? "/" + path : ""}.json`, {cache:"no-store"}); if(!r.ok) throw new Error("http " + r.status); return r.json(); },
+    put(val){ return req("PUT", "", val); },
+    update(u){ return req("PATCH", "", u); },
+    remove(){ return req("DELETE", ""); },
+    stop(){ es && es.close(); poll && clearInterval(poll); }
+  });
+  setConn("connecting");
+  return api;
+}
+
+/* ============================ APP STATE ============================ */
+const S = {
+  mode: "firebase", code: null, role: null, region: null, store: null, data: undefined, view: "landing",
+  pendingRegion: null, conn: "", knownDisease: null,
+  ui: { partner: null, give: {}, want: {}, sneak: false, confirmRegion: null, minutes: 5, confirmReset: false, testMode: false, joinCode: "" }
+};
+function setConn(c){ S.conn = c; const el = $("#conn"); if(el) el.outerHTML = connBadge(); }
+function connBadge(){
+  const map = {live:["live","Live"], poll:["poll","Live (slow mode)"], bad:["bad","Not connected"], connecting:["","Connecting…"], local:["live","Test mode (this computer)"]};
+  const [cls, label] = map[S.conn] || ["", ""];
+  return `<span id="conn" class="conn ${cls}">${label}</span>`;
+}
+let toastTimer = null;
+function toast(text, bad){
+  const t = $("#toast"); t.textContent = text; t.className = "toast" + (bad ? " bad" : "");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.textContent = ""; }, 4500);
+}
+function saveSession(){ lsSet("silkroad-session", {code:S.code, role:S.role, region:S.region, mode:S.mode}); }
+function writeFail(e){
+  console.error(e);
+  toast(e && e.message === "denied" ? "The database said no. Add the Silk Road rules from the setup guide." : "Could not save that. Check the internet connection and try again.", true);
+}
+
+/* ============================ FLOW ============================ */
+function connect(code, role, region){
+  S.code = code; S.role = role; S.region = null; S.pendingRegion = region || null; S.data = undefined; S.knownDisease = null;
+  S.store = makeStore(S.mode, code);
+  S.store.on(onData);
+  S.view = role === "host" ? "host" : "pick";
+  if(role === "host") saveSession();
+  render();
+  S.store.start();
+}
+function onData(d){
+  const first = S.data === undefined;
+  S.data = d;
+  if(d && S.role === "group"){
+    if(S.pendingRegion && first){ const r = S.pendingRegion; S.pendingRegion = null; claimRegion(r, true); }
+    // disease arrival
+    if(S.region){
+      const mine = new Set(handOf(d, S.region).filter(c => c.g === "disease").map(c => c.id));
+      if(S.knownDisease){ for(const id of mine) if(!S.knownDisease.has(id)) toast("Oh no! A disease card came with your last trade."); }
+      S.knownDisease = mine;
+    }
+  }
+  render();
+}
+async function claimRegion(r, force){
+  const g = S.data?.groups?.[r];
+  if(g && g.client !== clientId() && !force && S.ui.confirmRegion !== r){ S.ui.confirmRegion = r; render(); return; }
+  try{
+    await S.store.update({[`groups/${r}`]: {ts: Date.now(), client: clientId()}});
+    S.region = r; S.view = "group"; S.ui.confirmRegion = null; S.knownDisease = null;
+    saveSession(); render();
+  }catch(e){ writeFail(e); }
+}
+async function createGame(){
+  const letters = "ABCDEFGHJKLMNPQRSUVWXYZ";
+  let code = "";
+  for(let tries=0; tries<6; tries++){
+    code = Array.from(crypto.getRandomValues(new Uint8Array(4)), b => letters[b % letters.length]).join("");
+    if(code === "TEST") continue;
+    const probe = makeStoreProbe(code);
+    try{ if(!(await probe())) break; }catch(e){ break; }
+  }
+  S.code = code;
+  const store = makeStore(S.mode, code);
+  try{
+    await store.put({meta:{created:Date.now(), phase:"lobby", endsAt:0}, hands: dealHands()});
+  }catch(e){ writeFail(e); return; }
+  store.stop && store.stop();
+  connect(code, "host");
+}
+function makeStoreProbe(code){
+  if(S.mode === "local") return async () => lsGet("silkroad-local:" + code);
+  return async () => { const r = await fetch(`${dbUrl()}/${DB_ROOT}/${code}/meta.json`, {cache:"no-store"}); return r.ok ? r.json() : null; };
+}
+function leave(){
+  S.store && S.store.stop && S.store.stop();
+  lsDel("silkroad-session");
+  S.store = null; S.code = null; S.role = null; S.region = null; S.data = undefined; S.view = "landing";
+  try{ if(location.search) history.replaceState(null, "", location.pathname); }catch(e){}
+  render();
+}
+
+/* ---- host actions ---- */
+async function nextPhase(){
+  const ph = S.data?.meta?.phase || "lobby", nx = PHASES[pIdx(ph) + 1];
+  if(!nx) return;
+  const u = {"meta/phase": nx, "meta/endsAt": 0};
+  if(nx === "r2" || nx === "r3") u["meta/endsAt"] = Date.now() + S.ui.minutes * 60000;
+  if(nx === "news2") u["tasks/china"] = "pending";
+  try{ await S.store.update(u); }catch(e){ writeFail(e); }
+}
+async function setTimer(mins){ try{ await S.store.update({"meta/endsAt": mins ? Date.now() + mins*60000 : 0}); }catch(e){ writeFail(e); } }
+async function resetGame(){
+  try{ await S.store.put({meta:{created:Date.now(), phase:"lobby", endsAt:0}, hands: dealHands(), groups: S.data?.groups || null}); S.ui.confirmReset = false; }
+  catch(e){ writeFail(e); }
+}
+
+/* ---- group actions ---- */
+function resetBuilder(){ S.ui.give = {}; S.ui.want = {}; S.ui.sneak = false; }
+function pickIds(cards, sel){
+  const ids = [];
+  for(const st of stacks(cards)){ const n = sel[st.key] || 0; ids.push(...st.ids.slice(0, n)); }
+  return ids;
+}
+async function sendOffer(){
+  const d = S.data, me = S.region, to = S.ui.partner, phase = d.meta.phase;
+  if(!canTrade(phase, me, to)) return toast("You can't trade with that region right now.", true);
+  const myCards = handOf(d, me).filter(c => c.g !== "disease"), theirCards = handOf(d, to).filter(c => c.g !== "disease");
+  const give = pickIds(myCards, S.ui.give), want = pickIds(theirCards, S.ui.want);
+  if(!give.length && !want.length) return toast("Choose at least one card to give or ask for.", true);
+  const dis = S.ui.sneak ? (handOf(d, me).find(c => c.g === "disease")?.id || null) : null;
+  const id = Date.now().toString(36) + rid(4);
+  const offer = {from: me, to, phase, ts: Date.now(), status: "open",
+    give: Object.fromEntries(give.map(i => [i, true])), want: Object.fromEntries(want.map(i => [i, true]))};
+  if(dis) offer.sneak = dis;
+  try{ await S.store.update({[`offers/${id}`]: offer}); resetBuilder(); toast(`Offer sent to ${REGIONS[to].name}.`); }
+  catch(e){ writeFail(e); }
+}
+async function respond(id, accept){
+  const o = S.data?.offers?.[id]; if(!o || o.status !== "open") return;
+  if(!accept){ try{ await S.store.update({[`offers/${id}/status`]: "declined"}); }catch(e){ writeFail(e); } return; }
+  let hands;
+  try{ hands = await S.store.get("hands"); }catch(e){ return writeFail(e); }
+  const phaseNow = S.data.meta.phase;
+  const give = Object.keys(o.give || {}), want = Object.keys(o.want || {});
+  const sendIds = o.sneak ? [...give, o.sneak] : give;
+  const ok = phaseNow === o.phase && canTrade(phaseNow, o.from, o.to) &&
+    sendIds.every(i => hands?.[o.from]?.[i]) && want.every(i => hands?.[o.to]?.[i]);
+  if(!ok){ try{ await S.store.update({[`offers/${id}/status`]: "failed"}); }catch(e){} return toast("That deal can't happen any more: the cards have moved or the round has ended.", true); }
+  const u = {};
+  for(const i of sendIds){ u[`hands/${o.from}/${i}`] = null; u[`hands/${o.to}/${i}`] = hands[o.from][i]; }
+  for(const i of want){ u[`hands/${o.to}/${i}`] = null; u[`hands/${o.from}/${i}`] = hands[o.to][i]; }
+  u[`offers/${id}/status`] = "accepted";
+  u[`log/${Date.now().toString(36)}${rid(3)}`] = {type:"trade", ts:Date.now(), phase:o.phase, from:o.from, to:o.to,
+    give: give.map(i => hands[o.from][i].g), want: want.map(i => hands[o.to][i].g), disease: !!o.sneak};
+  try{ await S.store.update(u); toast("Deal done!"); }catch(e){ writeFail(e); }
+}
+async function cancelOffer(id){ try{ await S.store.update({[`offers/${id}/status`]: "cancelled"}); }catch(e){ writeFail(e); } }
+async function payTax(cardId){
+  const c = S.data?.hands?.china?.[cardId]; if(!c) return;
+  try{ await S.store.update({[`hands/china/${cardId}`]: null, "tasks/china": "done",
+    [`log/${Date.now().toString(36)}${rid(3)}`]: {type:"tax", ts:Date.now(), phase:"news2", from:"china", give:[c.g]}}); toast("Tax paid to the emperor."); }
+  catch(e){ writeFail(e); }
+}
+
+/* ============================ VIEWS ============================ */
+function render(){
+  const app = $("#app");
+  if(S.view === "landing") app.innerHTML = viewLanding();
+  else if(S.data === undefined) app.innerHTML = `<div class="wrap"><p class="muted">Connecting to game ${esc(S.code)}… ${connBadge()}</p></div>`;
+  else if(S.data === null) app.innerHTML = viewMissing();
+  else if(S.view === "host") app.innerHTML = viewHost();
+  else if(S.view === "pick" || !S.region) app.innerHTML = viewPick();
+  else app.innerHTML = viewGroup();
+  tick();
+}
+function viewLanding(){
+  return `<div class="wrap stack">
+    <div class="hero">
+      <div class="eyebrow">A trading game for Grade 5</div>
+      <h1>Silk Road Traders</h1>
+      <div class="road" aria-hidden="true"></div>
+      <p>Six regions, three rounds, one long road. Trade food, goods, inventions and beliefs across Afro-Eurasia, and try not to catch anything on the way.</p>
+    </div>
+    <div class="choices">
+      <section class="panel stack">
+        <div class="eyebrow">Students</div>
+        <h2>Join your group</h2>
+        <p class="muted" style="margin:0">Type the code on your teacher's screen.</p>
+        <form id="joinForm" class="row">
+          <label for="joinCode" class="eyebrow" style="width:100%">Game code</label>
+          <input id="joinCode" class="codein" maxlength="4" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABCD" value="${esc(S.ui.joinCode)}">
+          <button class="btn primary" type="submit">Join</button>
+        </form>
+      </section>
+      <section class="panel stack">
+        <div class="eyebrow">Teacher</div>
+        <h2>Start a new game</h2>
+        <p class="muted" style="margin:0">Opens the teacher screen with a game code to project. Each group needs one device.</p>
+        <div><button class="btn primary" data-act="create">Create game</button></div>
+      </section>
+    </div>
+    <label class="switch panel" for="testMode">
+      <input type="checkbox" id="testMode" ${S.ui.testMode ? "checked" : ""}>
+      <span><b>Test mode</b><br><span class="muted">Play on this computer only, using separate browser tabs for each group. Nothing is sent to the internet. Turn this on before creating or joining.</span></span>
+    </label>
+    <div class="foot">
+      <button class="btn small" data-act="check">Check connection</button>
+      <span id="checkOut" class="muted"></span>
+    </div>
+  </div>`;
+}
+function viewMissing(){
+  return `<div class="wrap stack"><h1>Game ${esc(S.code)} not found</h1>
+    <p class="muted">Check the code on your teacher's screen. ${S.mode === "local" ? "You are in test mode, so the game must have been created on this computer." : ""}</p>
+    <div><button class="btn primary" data-act="leave">Back</button></div></div>`;
+}
+function viewPick(){
+  const groups = S.data.groups || {};
+  return `<div class="wrap stack">
+    <div class="row" style="justify-content:space-between"><div><div class="eyebrow">Game ${esc(S.code)}</div><h1>Which region is your group?</h1></div>${connBadge()}</div>
+    <div class="regions">${ORDER.map(r => {
+      const taken = !!groups[r] && groups[r].client !== clientId();
+      const conf = S.ui.confirmRegion === r;
+      return `<button class="rtile ${taken ? "taken" : ""}" style="--rc:${rc(r)}" data-act="claim" data-r="${r}">
+        <span class="eyebrow">${ZONES[REGIONS[r].zone].name} zone</span>
+        <h3>${REGIONS[r].name}</h3>
+        <span class="muted">${esc(REGIONS[r].blurb)}</span>
+        ${taken ? `<span class="chip">${conf ? "Tap again to rejoin as this group" : "Already joined"}</span>` : ""}
+      </button>`; }).join("")}</div>
+    <div><button class="btn small" data-act="leave">Leave game</button></div>
+  </div>`;
+}
+function cardHTML(st, me, qty){
+  const G = GOODS[st.g], foreign = st.o !== me && st.g !== "disease";
+  return `<div class="card ${foreign ? "foreign" : ""} ${st.g === "disease" ? "disease" : ""}" style="--oc:${rc(st.o)}">
+    <div class="band"></div>
+    ${qty > 1 ? `<span class="qty">×${qty}</span>` : ""}
+    <div class="body">
+      <div class="name">${esc(G.name)}</div>
+      <div class="desc">${esc(G.desc)}</div>
+      <div class="from">${glyph(G.kind)} ${KINDS[G.kind].label} · from ${REGIONS[st.o].name}</div>
+    </div></div>`;
+}
+function handHTML(d, me){
+  const st = stacks(handOf(d, me));
+  if(!st.length) return `<p class="muted">You have no cards left.</p>`;
+  return `<div class="kinds">${KIND_ORDER.map(k => {
+    const ks = st.filter(s => GOODS[s.g].kind === k); if(!ks.length) return "";
+    const n = ks.reduce((a,s) => a + s.ids.length, 0);
+    return `<div class="kind-row"><h3>${glyph(k)} ${KINDS[k].label} <span class="muted">(${n})</span></h3>
+      <div class="cards">${ks.map(s => cardHTML(s, me, s.ids.length)).join("")}</div></div>`; }).join("")}</div>`;
+}
+function statsHTML(d, me){
+  const s = liveStats(d, me);
+  return `<div class="stats">
+    <div class="stat ${s.food >= s.need ? "ok" : "warn"}"><b>${s.food}</b><span>Food cards (you need ${s.need})</span></div>
+    <div class="stat"><b>${s.foreign}</b><span>Cards from other regions</span></div>
+    <div class="stat"><b>${s.total}</b><span>Cards in your hand</span></div>
+  </div>`;
+}
+function viewGroup(){
+  const d = S.data, me = S.region, ph = d.meta?.phase || "lobby";
+  return `<header class="gbar" style="--rc:${rc(me)}"><div class="wrap">
+      <span class="dot" style="--rc:${rc(me)}"></span><h1>${REGIONS[me].name}</h1>
+      <span class="chip">${ZONES[REGIONS[me].zone].name} zone</span>
+      <span class="spacer"></span>
+      <span class="chip">${PHASE_LABEL[ph]}</span>
+      <span class="timer" data-timer></span>
+    </div></header>
+    <div class="wrap stack">
+      ${statsHTML(d, me)}
+      <div class="gmain">
+        <section class="stack" aria-label="Your cards"><h2 style="font-size:1.4rem">Your cards</h2>${handHTML(d, me)}</section>
+        <aside class="side stack">${sidePanel(d, me, ph)}</aside>
+      </div>
+      <div class="foot">${connBadge()} <span>Game ${esc(S.code)}</span> <button class="btn small" data-act="leave">Leave</button></div>
+    </div>`;
+}
+function qList(qs){ return qs && qs.length ? `<ol class="qs">${qs.map(q => `<li>${esc(q)}</li>`).join("")}</ol>` : ""; }
+function sidePanel(d, me, ph){
+  const info = PHASE_INFO[ph];
+  if(ph === "lobby") return `<div class="panel stack"><h2>You're in!</h2><p style="margin:0">Waiting for your teacher to start Round 1. Look through your cards while you wait.</p>
+    <div><div class="eyebrow">How to score</div><ol class="qs">${RULES_TEXT.map(t => `<li>${esc(t)}</li>`).join("")}</ol></div></div>`;
+  if(ph === "r1") return `<div class="panel stack"><div class="eyebrow">Round 1</div><h2>Know your region</h2><p style="margin:0">${esc(info.text)}</p>
+    <div><div class="eyebrow">Talk about it</div>${qList(info.q)}</div>
+    <div><div class="eyebrow">How to score</div><ol class="qs">${RULES_TEXT.map(t => `<li>${esc(t)}</li>`).join("")}</ol></div>
+    <p class="muted" style="margin:0">Your secret disease card is in your hand. In Round 2 you can try to sneak it into a trade.</p></div>`;
+  if(ph === "r2" || ph === "r3") return tradePanel(d, me, ph);
+  if(ph === "news2") return newsCard(me, NEWS2[me], "News #2", info.q) + (me === "china" ? taxPanel(d) : "");
+  if(ph === "news3"){
+    const sc = scoreRegion(d, me);
+    return newsCard(me, NEWS3[me], "News #3", info.q, "Every disease card you hold: minus 2 points.") + scorePanel(sc);
+  }
+  if(ph === "final"){
+    const sc = scoreRegion(d, me), ranking = ORDER.map(r => ({r, t: scoreRegion(d, r).total})).sort((a,b) => b.t - a.t);
+    const pos = ranking.findIndex(x => x.r === me) + 1;
+    return `<div class="panel stack"><div class="eyebrow">Final result</div>
+      <div class="row" style="justify-content:space-between"><h2>Place ${pos} of 6</h2><span class="big-total">${sc.total}</span></div>
+      ${scoreLines(sc)}</div>
+      <div class="panel stack"><div class="eyebrow">Wrapping up</div>${qList(info.q)}</div>`;
+  }
+  return "";
+}
+function newsCard(me, n, label, qs, extra){
+  return `<div class="news" style="--rc:${rc(me)}"><div class="head"><div class="eyebrow">${label} for ${REGIONS[me].name}</div><h2>${esc(n.title)}</h2></div>
+    <div class="inner"><p style="margin:0">${esc(n.story)}</p><p class="effect" style="margin:0">${esc(n.effect)}</p>
+    ${extra ? `<p class="effect" style="margin:0">${esc(extra)}</p>` : ""}
+    <div><div class="eyebrow">Talk about it</div>${qList(qs)}</div></div></div>`;
+}
+function taxPanel(d){
+  const status = d.tasks?.china;
+  if(status !== "pending") return `<div class="panel"><b>Tax paid.</b> <span class="muted">The emperor is happy, for now.</span></div>`;
+  const st = stacks(handOf(d, "china").filter(c => ["food","goods"].includes(GOODS[c.g].kind)));
+  if(!st.length) return `<div class="panel">You have no food or goods to pay tax with.</div>`;
+  return `<div class="modal"><div class="eyebrow">The emperor's tax</div><b>Choose one food or goods card to give up.</b>
+    <div class="row">${st.map(s => `<button class="btn small" data-act="tax" data-id="${s.ids[0]}">${glyph(GOODS[s.g].kind)} ${esc(GOODS[s.g].name)}${s.o !== "china" ? ` <span class="muted">(${REGIONS[s.o].name})</span>` : ""}</button>`).join("")}</div></div>`;
+}
+function scoreLines(sc){
+  return `<div class="score-lines">${sc.lines.map(l => `<div><span>${esc(l.label)}</span><span class="pts ${l.pts < 0 ? "neg" : "pos"}">${l.pts > 0 ? "+" : ""}${l.pts}</span></div>`).join("") || `<div><span>No points yet</span><span class="pts">0</span></div>`}</div>`;
+}
+function scorePanel(sc){
+  return `<div class="panel stack"><div class="eyebrow">Your score</div>${scoreLines(sc)}<div class="score-total"><span>Total</span><span class="mono">${sc.total}</span></div></div>`;
+}
+function pickerHTML(cards, sel, side, me){
+  const st = stacks(cards);
+  if(!st.length) return `<p class="muted" style="margin:0">No cards.</p>`;
+  return `<div class="picker">${st.map(s => {
+    const n = sel[s.key] || 0, G = GOODS[s.g];
+    return `<div class="pick" style="--oc:${rc(s.o)}">
+      <span style="color:var(--oc)">${glyph(G.kind)}</span>
+      <span class="nm">${esc(G.name)} <small>from ${REGIONS[s.o].name}${s.o !== me && side === "give" ? "" : ""} · has ${s.ids.length}</small></span>
+      <span class="step"><button type="button" aria-label="Fewer ${esc(G.name)}" data-act="dec" data-side="${side}" data-k="${s.key}">−</button>
+        <output class="${n ? "on" : ""}">${n}</output>
+        <button type="button" aria-label="More ${esc(G.name)}" data-act="inc" data-side="${side}" data-k="${s.key}" data-max="${s.ids.length}">+</button></span>
+    </div>`; }).join("")}</div>`;
+}
+function tradePanel(d, me, ph){
+  const offers = Object.entries(d.offers || {}).map(([id,o]) => ({id, ...o})).filter(o => o.phase === ph).sort((a,b) => b.ts - a.ts);
+  const incoming = offers.filter(o => o.to === me && o.status === "open");
+  const outgoing = offers.filter(o => o.from === me && o.status === "open");
+  const done = offers.filter(o => (o.from === me || o.to === me) && o.status !== "open").slice(0, 5);
+  const hands = d.hands || {};
+  const terms = (o, viewer) => {
+    const g = Object.keys(o.give || {}).map(i => (hands[o.from]?.[i] || hands[o.to]?.[i])?.g).filter(Boolean);
+    const w = Object.keys(o.want || {}).map(i => (hands[o.to]?.[i] || hands[o.from]?.[i])?.g).filter(Boolean);
+    return viewer === o.to
+      ? `<b>${REGIONS[o.from].name}</b> gives you <b>${esc(listGoods(g))}</b> for your <b>${esc(listGoods(w))}</b>`
+      : `You give <b>${esc(listGoods(g))}</b>${o.sneak ? " (+ secret disease)" : ""} to <b>${REGIONS[o.to].name}</b> for <b>${esc(listGoods(w))}</b>`;
+  };
+  const partner = S.ui.partner && canTrade(ph, me, S.ui.partner) ? S.ui.partner : null;
+  if(!partner) S.ui.partner = null;
+  const hasDisease = handOf(d, me).some(c => c.g === "disease");
+  const info = PHASE_INFO[ph];
+  return `
+  ${incoming.length ? `<div class="panel stack"><div class="eyebrow">Offers for you (${incoming.length})</div>
+    ${incoming.map(o => `<div class="offer" style="--rc:${rc(o.from)}"><div class="terms">${terms(o, me)}</div>
+      <div class="row"><button class="btn primary small" data-act="accept" data-id="${o.id}">Accept</button><button class="btn small" data-act="decline" data-id="${o.id}">Say no</button></div></div>`).join("")}</div>` : ""}
+  <div class="panel stack">
+    <div class="eyebrow">${ph === "r2" ? "Round 2: trade inside your zone" : "Round 3: trade with next-door zones"}</div>
+    <h2>Make an offer</h2>
+    <div class="partners">${ORDER.filter(r => r !== me).map(r => {
+      const ok = canTrade(ph, me, r);
+      return `<button class="ptn ${partner === r ? "on" : ""}" style="--rc:${rc(r)}" data-act="partner" data-r="${r}" ${ok ? "" : "disabled"}>
+        <b>${REGIONS[r].name}</b><small>${ok ? ZONES[REGIONS[r].zone].name + " zone" : esc(whyNot(ph, me, r))}</small></button>`; }).join("")}</div>
+    ${partner ? `
+      <div class="stack">
+        <div><div class="eyebrow">You give</div>${pickerHTML(handOf(d, me).filter(c => c.g !== "disease"), S.ui.give, "give", me)}</div>
+        <div><div class="eyebrow">You ask ${REGIONS[partner].name} for</div>${pickerHTML(handOf(d, partner).filter(c => c.g !== "disease"), S.ui.want, "want", me)}</div>
+        ${hasDisease ? `<label class="switch" for="sneak"><input type="checkbox" id="sneak" ${S.ui.sneak ? "checked" : ""}><span><b>Sneak your disease card into this trade</b><br><span class="muted">${REGIONS[partner].name} won't see it until they accept.</span></span></label>` : ""}
+        <div class="row"><button class="btn primary" data-act="send">Send offer</button><button class="btn small" data-act="clear">Clear</button></div>
+      </div>` : `<p class="muted" style="margin:0">Pick a region to trade with. Talk to them face to face first, then send the offer you agreed.</p>`}
+  </div>
+  ${outgoing.length ? `<div class="panel stack"><div class="eyebrow">Waiting for an answer</div>
+    ${outgoing.map(o => `<div class="offer" style="--rc:${rc(o.to)}"><div class="terms">${terms(o, me)}</div><div><button class="btn small" data-act="cancel" data-id="${o.id}">Take back</button></div></div>`).join("")}</div>` : ""}
+  ${done.length ? `<div class="panel stack"><div class="eyebrow">Recent deals</div>
+    ${done.map(o => `<div class="offer" style="--rc:${rc(o.from === me ? o.to : o.from)}"><span class="muted" style="font-size:.85rem">${o.from === me ? "To " + REGIONS[o.to].name : "From " + REGIONS[o.from].name}</span>
+      <span class="status ${o.status}">${{accepted:"Deal done",declined:"They said no",failed:"Could not happen",cancelled:"Taken back"}[o.status] || o.status}</span></div>`).join("")}</div>` : ""}
+  <div class="panel stack"><div class="eyebrow">Think about it</div>${qList(info.q)}</div>`;
+}
+
+/* ---- host ---- */
+const NODE = {byzantium:[110,104], arabia:[230,200], persia:[420,104], india:[500,200], centralAsia:[690,104], china:[800,200]};
+function mapSVG(d){
+  const ph = d.meta?.phase, groups = d.groups || {};
+  const zoneX = {west:[30,300], middle:[320,600], east:[620,880]};
+  let allowed = "";
+  if(ph === "r2" || ph === "r3"){
+    const seen = new Set();
+    for(const a of ORDER) for(const b of ORDER){ const k = [a,b].sort().join(); if(a !== b && !seen.has(k) && canTrade(ph, a, b)){ seen.add(k);
+      const [x1,y1] = NODE[a], [x2,y2] = NODE[b];
+      allowed += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 6" opacity=".7"/>`; } }
+  }
+  const trades = Object.values(d.log || {}).filter(e => e.type === "trade").sort((a,b) => b.ts - a.ts).slice(0, 8);
+  const lines = trades.map((e, i) => { const [x1,y1] = NODE[e.from], [x2,y2] = NODE[e.to]; const mx = (x1+x2)/2, my = Math.min(y1,y2) - 40 - i*4;
+    return `<path class="trade-line" pathLength="100" d="M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}" fill="none" stroke="var(--${e.from})" stroke-width="${i === 0 ? 4 : 2.5}" stroke-dasharray="100" opacity="${1 - i*0.1}"/>`; }).join("");
+  return `<svg viewBox="0 0 910 272" role="img" aria-label="Map of the six regions along the Silk Road, from West to East">
+    ${Object.entries(zoneX).map(([z,[a,b]]) => `<rect x="${a}" y="14" width="${b-a}" height="246" rx="14" fill="var(--surface-2)" stroke="var(--line)"/>
+      <text x="${(a+b)/2}" y="36" text-anchor="middle" font-size="13" font-weight="700" letter-spacing="2" fill="var(--muted)" font-family="Atkinson Hyperlegible, sans-serif">${ZONES[z].name.toUpperCase()} ZONE</text>`).join("")}
+    <path d="M40 152 C 160 122, 260 182, 380 150 S 600 124, 700 152 S 840 172, 880 148" fill="none" stroke="var(--saffron)" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 12" opacity=".8"/>
+    ${allowed}${lines}
+    ${ORDER.map(r => { const [x,y] = NODE[r], st = liveStats(d, r), joined = !!groups[r];
+      return `<g><circle cx="${x}" cy="${y}" r="24" fill="${joined ? `var(--${r})` : "var(--surface)"}" stroke="var(--${r})" stroke-width="4"/>
+        <text x="${x}" y="${y+5}" text-anchor="middle" font-size="15" font-weight="700" fill="${joined ? "#fff" : `var(--${r})`}" font-family="JetBrains Mono, monospace">${st.foreign}</text>
+        <text x="${x}" y="${y + (y < 150 ? -34 : 44)}" text-anchor="middle" font-size="17" fill="var(--ink)" font-family="Young Serif, Georgia, serif">${REGIONS[r].name}</text></g>`; }).join("")}
+  </svg>`;
+}
+function feedHTML(d, reveal){
+  const items = Object.values(d.log || {}).sort((a,b) => b.ts - a.ts);
+  if(!items.length) return `<p class="muted" style="margin:0">Trades will appear here as they happen.</p>`;
+  return items.slice(0, 40).map(e => e.type === "tax"
+    ? `<div class="item" style="--rc:var(--china)"><small>${PHASE_LABEL[e.phase]}</small>China paid the emperor 1 ${esc(GOODS[e.give[0]].name)} in tax</div>`
+    : `<div class="item" style="--rc:var(--${e.from})"><small>${PHASE_LABEL[e.phase]}</small><b>${REGIONS[e.from].name}</b> → <b>${REGIONS[e.to].name}</b>: ${esc(listGoods(e.give))} for ${esc(listGoods(e.want))}${reveal && e.disease ? ` <b style="color:var(--bad)">+ disease</b>` : ""}</div>`).join("");
+}
+function viewHost(){
+  const d = S.data, ph = d.meta?.phase || "lobby", info = PHASE_INFO[ph], groups = d.groups || {};
+  const joinedN = ORDER.filter(r => groups[r]).length;
+  const hosted = /^https?:$/.test(location.protocol) && !/srcdoc/.test(location.href);
+  const url = hosted ? location.origin + location.pathname : "the web address where you put this game";
+  const reveal = ph === "final";
+  const trade = ph === "r2" || ph === "r3";
+  let lower = "";
+  if(ph === "final" || ph === "news3"){
+    const board = ORDER.map(r => ({r, sc: scoreRegion(d, r)})).sort((a,b) => b.sc.total - a.sc.total);
+    lower = `<section class="panel stack"><div class="eyebrow">${ph === "final" ? "Final scores" : "Scores (shown on each group's screen)"}</div>
+      <div class="board">${board.map((x,i) => `<div class="line" style="--rc:${rc(x.r)}"><span class="rank">${i+1}</span>
+        <details><summary>${REGIONS[x.r].name}</summary>${scoreLines(x.sc)}</details><span class="tot">${x.sc.total}</span></div>`).join("")}</div></section>`;
+    if(ph === "final"){
+      const trail = Object.values(d.log || {}).filter(e => e.type === "trade" && e.disease).sort((a,b) => a.ts - b.ts);
+      lower += `<section class="panel stack"><div class="eyebrow">The disease trail</div>
+        ${trail.length ? `<ol class="qs">${trail.map(e => `<li>${REGIONS[e.from].name} passed a disease to ${REGIONS[e.to].name} (${PHASE_LABEL[e.phase]})</li>`).join("")}</ol>` : `<p class="muted" style="margin:0">Nobody passed on a disease card.</p>`}
+        <p class="muted" style="margin:0">Diseases like the plague really did travel along the Silk Roads with merchants and their goods.</p></section>`;
+    }
+  }
+  if(ph === "news2" || ph === "news3"){
+    const N = ph === "news2" ? NEWS2 : NEWS3;
+    lower = `<section class="panel stack"><div class="eyebrow">This round's news</div><div class="rstat">${ORDER.map(r => `<div class="r" style="--rc:${rc(r)}"><b>${REGIONS[r].name}: ${esc(N[r].title)}</b>${esc(N[r].effect)}${ph === "news2" && r === "china" ? `<br><span class="chip">${d.tasks?.china === "done" ? "Tax paid" : "Tax not paid yet"}</span>` : ""}</div>`).join("")}</div></section>` + lower;
+  }
+  return `<header class="hbar"><div class="wrap">
+      <div><div class="eyebrow">Silk Road Traders</div><h1>${esc(info.title)}</h1></div>
+      <span style="flex:1"></span>
+      <div class="codebox"><span class="eyebrow">Game code</span><b>${esc(S.code)}</b></div>
+      <span class="timer" data-timer></span>
+    </div></header>
+    <div class="wrap stack">
+      <div class="steps">${PHASES.map((p,i) => `<span class="${p === ph ? "now" : i < pIdx(ph) ? "done" : ""}">${PHASE_LABEL[p]}</span>`).join("")}</div>
+      <div class="hgrid">
+        <div class="stack">
+          <section class="panel mapbox">${mapSVG(d)}</section>
+          <p class="muted" style="margin:0;font-size:.85rem">Circles show how many cards each region has from other regions. ${trade ? "Dotted lines show who can trade this round." : ""}</p>
+          <section class="panel stack"><div class="eyebrow">Regions</div><div class="rstat">${ORDER.map(r => { const s = liveStats(d, r);
+            return `<div class="r" style="--rc:${rc(r)}"><b>${REGIONS[r].name}</b>${groups[r] ? "Joined" : "<span class='muted'>Not joined</span>"}<br>${s.total} cards · food ${s.food}/${s.need}</div>`; }).join("")}</div></section>
+          ${lower}
+        </div>
+        <div class="stack">
+          <section class="panel stack">
+            <p style="margin:0">${esc(info.text)}</p>
+            ${ph === "lobby" ? `<p style="margin:0">Groups go to <b class="mono" style="overflow-wrap:anywhere">${esc(url)}</b> and type <b class="mono">${esc(S.code)}</b>.</p><p class="muted" style="margin:0">${joinedN} of 6 regions joined.</p>` : ""}
+            ${info.q ? `<div><div class="eyebrow">Class questions</div>${qList(info.q)}</div>` : ""}
+            ${info.next ? `<div><button class="btn primary" data-act="next">${esc(info.next)}</button></div>` : ""}
+            <div class="row"><label for="mins" class="muted" style="font-size:.85rem">Trading time</label>
+              <select id="mins" class="btn small">${[3,4,5,6,8,10].map(m => `<option value="${m}" ${S.ui.minutes == m ? "selected" : ""}>${m} min</option>`).join("")}</select>
+              ${trade ? `<button class="btn small" data-act="timer">Restart timer</button><button class="btn small" data-act="timeroff">Stop timer</button>` : ""}</div>
+          </section>
+          <section class="panel stack"><div class="eyebrow">Trade feed</div><div class="feed">${feedHTML(d, reveal)}</div></section>
+          ${S.mode === "local" ? `<section class="panel stack"><div class="eyebrow">Test mode: open each group in a new tab</div><div class="row">${ORDER.map(r => `<a class="btn small" target="_blank" rel="noopener" href="?game=${S.code}&local=1&region=${r}">${REGIONS[r].name}</a>`).join("")}</div></section>` : ""}
+          <div class="foot">${connBadge()}
+            ${S.ui.confirmReset ? `<button class="btn small danger" data-act="reset">Yes, deal new cards</button><button class="btn small" data-act="noreset">Keep playing</button>` : `<button class="btn small" data-act="askreset">Restart game</button>`}
+            <button class="btn small" data-act="leave">Close teacher screen</button></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ============================ TIMER ============================ */
+function tick(){
+  const end = S.data?.meta?.endsAt || 0, ph = S.data?.meta?.phase;
+  document.querySelectorAll("[data-timer]").forEach(el => {
+    if(!end || !(ph === "r2" || ph === "r3")){ el.textContent = ""; return; }
+    const left = Math.max(0, Math.round((end - Date.now())/1000));
+    el.textContent = left ? `${Math.floor(left/60)}:${String(left%60).padStart(2,"0")}` : "Time's up";
+    el.classList.toggle("out", left === 0);
+  });
+}
+setInterval(tick, 1000);
+
+/* ============================ EVENTS ============================ */
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if(!b || b.disabled) return;
+  const a = b.dataset.act;
+  switch(a){
+    case "create": S.mode = S.ui.testMode ? "local" : "firebase"; createGame(); break;
+    case "check": checkConnection(); break;
+    case "leave": leave(); break;
+    case "claim": claimRegion(b.dataset.r); break;
+    case "next": nextPhase(); break;
+    case "timer": setTimer(S.ui.minutes); break;
+    case "timeroff": setTimer(0); break;
+    case "askreset": S.ui.confirmReset = true; render(); break;
+    case "noreset": S.ui.confirmReset = false; render(); break;
+    case "reset": resetGame(); break;
+    case "partner": if(S.ui.partner !== b.dataset.r){ S.ui.partner = b.dataset.r; S.ui.want = {}; } render(); break;
+    case "inc": case "dec": {
+      const side = S.ui[b.dataset.side], k = b.dataset.k, cur = side[k] || 0;
+      if(a === "inc") side[k] = Math.min(cur + 1, +b.dataset.max); else side[k] = Math.max(0, cur - 1);
+      render(); break; }
+    case "clear": resetBuilder(); render(); break;
+    case "send": sendOffer(); break;
+    case "accept": respond(b.dataset.id, true); break;
+    case "decline": respond(b.dataset.id, false); break;
+    case "cancel": cancelOffer(b.dataset.id); break;
+    case "tax": payTax(b.dataset.id); break;
+  }
+});
+document.addEventListener("change", e => {
+  if(e.target.id === "testMode") S.ui.testMode = e.target.checked;
+  if(e.target.id === "sneak") S.ui.sneak = e.target.checked;
+  if(e.target.id === "mins") S.ui.minutes = +e.target.value;
+});
+document.addEventListener("input", e => { if(e.target.id === "joinCode") S.ui.joinCode = e.target.value.toUpperCase(); });
+document.addEventListener("submit", e => {
+  if(e.target.id !== "joinForm") return;
+  e.preventDefault();
+  const code = (S.ui.joinCode || "").trim().toUpperCase();
+  if(!/^[A-Z]{4}$/.test(code)) return toast("Game codes are 4 letters.", true);
+  S.mode = S.ui.testMode ? "local" : "firebase";
+  connect(code, "group");
+});
+async function checkConnection(){
+  const out = $("#checkOut");
+  if(S.ui.testMode){ out.textContent = "Test mode is on, so no internet connection is needed."; return; }
+  if(!dbUrl()){ out.textContent = "No Firebase database URL is set in the file yet."; return; }
+  out.textContent = "Checking…";
+  const base = `${dbUrl()}/${DB_ROOT}/TEST`;
+  try{
+    const w = await fetch(base + ".json", {method:"PUT", headers:{"Content-Type":"application/json"}, body: JSON.stringify({meta:{created:Date.now()}})});
+    if(!w.ok){ out.textContent = w.status === 401 || w.status === 403 ? "Reached Firebase, but the rules block this game. Add the Silk Road rules from the setup guide." : `Firebase answered with error ${w.status}.`; return; }
+    const r = await fetch(base + "/meta.json", {cache:"no-store"});
+    await fetch(base + ".json", {method:"DELETE"});
+    out.textContent = r.ok ? "All good: this device can save and read games." : "Saving worked, but reading did not. Check the read rule.";
+  }catch(err){ out.textContent = "Could not reach Firebase from this network."; }
+}
+
+/* ============================ BOOT ============================ */
+(function boot(){
+  const p = new URLSearchParams(location.search);
+  const game = (p.get("game") || "").toUpperCase();
+  if(game){
+    S.mode = p.get("local") === "1" ? "local" : "firebase";
+    connect(game, p.get("host") === "1" ? "host" : "group", p.get("region") || null);
+    return;
+  }
+  const sess = lsGet("silkroad-session");
+  if(sess && sess.code){
+    S.mode = sess.mode || "firebase";
+    connect(sess.code, sess.role, sess.role === "group" ? sess.region : null);
+    return;
+  }
+  render();
+})();
+window.__silk = {S, scoreRegion, dealHands, canTrade};
+</script>
+</body>
+</html>
