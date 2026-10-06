@@ -6,7 +6,7 @@
 <title>Silk Road Traders</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Young+Serif&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Young+Serif&family=JetBrains+Mono:wght@500;700&family=Noto+Naskh+Arabic:wght@500;700&display=swap">
 <style>
 /* Layout: a caravan ledger. Lapis ink on cool sand, each region keeps its own dye colour.
    Teacher view = projected map + trade feed. Group view = hand of cards + one action panel. */
@@ -106,7 +106,7 @@ ol.qs{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
 .stat.warn b{color:var(--bad)} .stat.ok b{color:var(--good)}
 .gmain{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:start}
 @media (max-width:860px){.gmain{grid-template-columns:1fr}}
-.side{position:sticky;top:90px}
+.side{position:static}
 @media (max-width:860px){.side{position:static;order:-1}}
 .side h2{font-size:1.4rem}
 .partners{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
@@ -172,6 +172,25 @@ ol.qs{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
 .toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:20;background:var(--ink);color:var(--surface);padding:12px 18px;border-radius:12px;font-weight:700;max-width:min(92vw,520px);box-shadow:var(--shadow)}
 .toast.bad{background:var(--bad);color:#fff}
 .toast:empty{display:none}
+.ar{font-family:"Noto Naskh Arabic","Geeza Pro","Arial",serif;direction:rtl;unicode-bidi:isolate;font-weight:700}
+.card .arw{display:flex;gap:.45em;align-items:baseline;flex-wrap:wrap;font-size:.8rem;color:var(--ink)}
+.card .arw .ar{font-size:1.15rem;color:var(--accent)}
+.card .arw i{color:var(--muted);font-style:italic}
+.lesson{border:2px dashed var(--accent);border-radius:var(--r);padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;gap:8px}
+.words{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.word{background:var(--surface-2);border-radius:8px;padding:6px 10px;display:flex;flex-direction:column;align-items:flex-start}
+.word .ar{font-size:1.5rem;line-height:1.3;color:var(--accent)}
+.word i{font-size:.8rem;color:var(--muted)}
+.word b{font-size:.85rem}
+.quiz{border:3px solid var(--accent);background:var(--surface);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
+.quiz.battle{border-color:var(--bad)}
+.quiz .q{font-size:1.1rem;font-weight:700}
+.quiz .opts{display:grid;gap:8px}
+.quiz .opt{text-align:left;border:2px solid var(--line);background:var(--surface-2);border-radius:10px;padding:10px 12px;font-size:1rem}
+.quiz .opt:hover{border-color:var(--accent)}
+.quiz .opt .ar{font-size:1.3rem}
+.targets{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.steps span.skipped{text-decoration:line-through;opacity:.6}
 @media (prefers-reduced-motion:no-preference){
   .trade-line{animation:draw 1.2s ease-out both}
   @keyframes draw{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
@@ -256,8 +275,8 @@ const START = {
   arabia:{dyes:3,copper:3,algebra:1,maps:1,medical:2,islam:2},
   byzantium:{olive:2,grapes:2,glass:2,gold:3,glassmaking:1,orthodox:2}
 };
-const PHASES = ["lobby","r1","r2","news2","r3","news3","final"];
-const PHASE_LABEL = {lobby:"Lobby",r1:"Round 1",r2:"Round 2",news2:"News #2",r3:"Round 3",news3:"News #3",final:"Results"};
+const PHASES = ["lobby","r1","r2","news2","r3","news3","r4","news4","r5","final"];
+const PHASE_LABEL = {lobby:"Lobby",r1:"Round 1",r2:"Round 2",news2:"News #2",r3:"Round 3",news3:"News #3",r4:"Round 4",news4:"News #4",r5:"Round 5",final:"Results"};
 const PHASE_INFO = {
   lobby:{title:"Get into your regional groups",text:"Each group opens this page on one device, types the game code and picks its region.",next:"Start Round 1"},
   r1:{title:"Round 1: Know your region",text:"No trading with other regions yet. Look at your cards together and share out who looks after each kind of card.",
@@ -266,19 +285,25 @@ const PHASE_INFO = {
       q:["Was it hard to agree on a deal?","Did you swap one card for one card, or try for a better deal?","Did you manage to pass on your disease card?"],next:"End trading, share News #2"},
   news2:{title:"News arrives!",text:"Every region has a news card on its screen. Read it together. It changes your plan for Round 3.",
       q:["How does your news change your plan for Round 3?","What new ideas or beliefs have you seen so far?"],next:"Start Round 3"},
-  r3:{title:"Round 3: The long road",text:"Now you can also trade with the zone next door. The West and the East are too far apart to trade directly, so they need a Middle region to pass goods along.",
-      q:["Which region helped you as a middle trader?","What did the middle trader want in return?"],next:"End trading, share final news"},
-  news3:{title:"Final news and scores",text:"Every region has one last news card. Your scores are on your screens.",
-      q:["Did your news card help or hurt your score? Why?","Which new technology would improve your life the most?"],next:"Show results"},
+  r3:{title:"Round 3: The next zone",text:"Now you can also trade with the zone next door. Deals with another zone need your Translator! The West and the East are still too far apart, so they need a Middle region to pass goods along.",
+      q:["Which region helped you as a middle trader?","What did the middle trader want in return?","Was it hard to understand traders from another zone?"],next:"End trading, share News #3"},
+  news3:{title:"More news arrives",text:"Every region has another news card. These change how points are counted at the end of the game.",
+      q:["Which cards are worth more to you now?","Who will you need to trade with in Round 4?"],next:"Start Round 4"},
+  r4:{title:"Round 4: The long-distance road",text:"Any region can now trade with any other region. Far-away deals need your Translator to use Arabic, a language spoken by many Silk Road traders.",
+      q:["Was it harder to trade with regions far away? Why?","How did knowing some Arabic help?"],next:"End trading, share News #4"},
+  news4:{title:"War on the Silk Roads",text:"Empires are growing and fighting over the trade routes. In Round 5 groups can trade or go to battle.",
+      q:["Why might empires fight over trade routes?","What could a war do to trade?"],next:"Start Round 5 (war)"},
+  r5:{title:"Round 5: Empires and war",text:"Trade with anyone, or challenge a region to battle. Both groups answer the same question, and the first correct answer wins one of the other group's cards. Each group can start up to 3 battles.",
+      q:["Did war help or hurt your region?","Was trading or fighting the better way to get what you needed?"],next:"End the game: show results"},
   final:{title:"Wrapping up",text:"Compare the scores, then talk about what the game showed.",
-      q:["Why did disease cards spread along with trade?","How do beliefs travel when merchants trade?","Why were the Middle regions so important?","How did the Silk Roads change what people ate, wore and believed?"]}
+      q:["Why did disease cards spread along with trade?","How do beliefs travel when merchants trade?","Why were the Middle regions so important?","How did the Silk Roads change what people ate, wore and believed?","How did learning some Arabic help traders?"]}
 };
 const NEWS2 = {
   china:{title:"The emperor wants silk",story:"The emperor now collects taxes in silk. Families spend more time making silk and less time farming.",effect:"Pay your tax now: give up one food or goods card. Good news: any gold you collect will be worth double at the end."},
   centralAsia:{title:"More mouths to feed",story:"Your population is growing and you rule more land than ever.",effect:"At the end you need 3 food cards instead of 2. China seems to have plenty of food!"},
   india:{title:"More mouths to feed",story:"More people live in India and more land is under your control.",effect:"At the end you need 3 food cards instead of 2."},
-  persia:{title:"In the middle of the road",story:"Persia sits right in the middle of the Silk Roads. Everyone has to pass through.",effect:"In Round 3 you earn 1 bonus point for every trade you make. Be the middle merchant!"},
-  arabia:{title:"Your ideas are spreading",story:"Traders are carrying Arabian ideas and beliefs along the routes.",effect:"At the end you earn 1 bonus point for every Arabian technology or belief card that another region holds. And remember: you still need food!"},
+  persia:{title:"In the middle of the road",story:"Persia sits right in the middle of the Silk Roads. Everyone has to pass through.",effect:"In Rounds 3 and 4 you earn 1 bonus point for every trade you make. Be the middle merchant!"},
+  arabia:{title:"Your ideas are spreading",story:"Traders are carrying Arabian ideas and beliefs along the routes.",effect:"At the end you earn 1 bonus point for every Arabian technology or belief card that another region holds. Arabic is your own language, so your Translator never needs to pass a challenge. And remember: you still need food!"},
   byzantium:{title:"Everyone wants your gold",story:"Stories of your glass and gold are spreading. China really wants your gold.",effect:"Any silk you collect will be worth double at the end."}
 };
 const NEWS3 = {
@@ -289,12 +314,50 @@ const NEWS3 = {
   arabia:{title:"Pilgrims and growing cities",story:"Your cities are growing and pilgrims travel to Mecca from far away.",effect:"Every belief card is worth 2 points, wherever it came from."},
   byzantium:{title:"Rich, but in danger",story:"Your wealth makes you a target for invaders. Silk is changing how people dress.",effect:"Lose 1 point for every gold card you still have. Silk still counts double."}
 };
+const AR = {
+  rice:["أرز","aruzz"], wheat:["قمح","qamh"], silk:["حرير","hareer"], ginger:["زنجبيل","zanjabeel"], paper:["ورق","waraq"], gunpowder:["بارود","baarood"],
+  livestock:["غنم","ghanam"], horses:["حصان","hisaan"], hides:["جلد","jild"], saddles:["سرج","sarj"],
+  barley:["شعير","sha'eer"], pepper:["فلفل","filfil"], spices:["توابل","tawaabil"], cotton:["قطن","qutn"], medicine:["دواء","dawaa'"],
+  grain:["حبوب","huboob"], dates:["تمر","tamr"], wool:["صوف","soof"], lapis:["لازورد","laazaward"], metalwork:["نشادر","nushaadir"],
+  dyes:["أصباغ","asbaagh"], copper:["نحاس","nuhaas"], algebra:["الجبر","al-jabr"], maps:["خريطة","khareeta"], medical:["مستشفى","mustashfa"], islam:["إسلام","islaam"],
+  olive:["زيت زيتون","zayt zaytoon"], grapes:["عنب","'inab"], glass:["زجاج","zujaaj"], gold:["ذهب","dhahab"], glassmaking:["صناعة الزجاج","sinaa'at az-zujaaj"],
+  disease:["مرض","marad"]
+};
+const LESSONS = {
+  r1:[["مرحبا","marhaba","Hello"],["شكرا","shukran","Thank you"],["سوق","sooq","Market"]],
+  r2:[["نعم","na'am","Yes"],["لا","laa","No"],["واحد","waahid","One"],["اثنان","ithnaan","Two"],["ثلاثة","thalaatha","Three"]],
+  r3:[["تاجر","taajir","Trader"],["مترجم","mutarjim","Translator"],["طريق","tareeq","Road"]],
+  r4:[["تجارة","tijaara","Trade"],["صديق","sadeeq","Friend"],["بعيد","ba'eed","Far away"]],
+  r5:[["حرب","harb","War"],["سلام","salaam","Peace"],["فوز","fawz","Victory"]]
+};
+const FACTS = [
+  ["Which region was the first to make silk?",["China","Persia","Byzantium"]],
+  ["What was the capital city of Byzantium?",["Constantinople","Baghdad","Delhi"]],
+  ["What did China want most from Central Asia?",["Horses","Glass","Dates"]],
+  ["The Silk Roads linked Asia with...",["Africa and Europe","the Americas","Australia"]],
+  ["Which of these is a belief, not a good?",["Buddhism","Cotton","Copper"]],
+  ["Which Chinese invention was first used for fireworks?",["Gunpowder","Paper money","Algebra"]],
+  ["The maths word 'algebra' comes from which language?",["Arabic","Chinese","Greek"]],
+  ["What helped riders stay steady on a galloping horse?",["Stirrups","Lapis lazuli","Dyes"]],
+  ["Why did diseases spread along the Silk Roads?",["Traders carried germs","Silk was poisonous","The sun was too hot"]],
+  ["Merchants who passed goods along for others were...",["Middlemen","Emperors","Pilgrims"]],
+  ["Which animal carried goods across the deserts?",["Camels","Penguins","Kangaroos"]],
+  ["Which region sat in the middle of the Silk Roads?",["Persia","China","Byzantium"]],
+  ["Why was paper money useful to traders?",["It was light to carry","You could eat it","It was shiny"]],
+  ["Which region had no food at the start of this game?",["Arabia","China","India"]],
+  ["Lapis lazuli is a...",["Blue stone","Spice","Kind of horse"]]
+];
+const NEWS4 = {title:"Empires go to war", story:"Growing empires are fighting over the trade routes. Armies make travel dangerous, but some merchants grow rich.", effect:"In Round 5 you can still trade, and you can challenge any region to a battle (up to 3). Both groups answer the same question. The first correct answer wins one of the other group's cards. Each battle you win is also worth 1 point."};
+const ROUND_NO = {r1:1,r2:2,r3:3,r4:4,r5:5};
+const TRADE_PHASES = ["r2","r3","r4","r5"];
+const MAX_BATTLES = 3, BATTLE_MS = 30000;
 const RULES_TEXT = [
   "+1 point for each card from another region.",
   "+2 points if you hold all four kinds: food, goods, technology and belief.",
   "You need at least 2 food cards to survive, or you lose 3 points.",
   "Each disease card you hold at the end: minus 2 points.",
-  "News cards in Rounds 2 and 3 can change these rules!"
+  "Each battle you win in Round 5: plus 1 point.",
+  "News cards can change these rules!"
 ];
 
 /* ============================ HELPERS ============================ */
@@ -335,10 +398,13 @@ function canTrade(phase, a, b){
   const za = ZONES[REGIONS[a].zone].i, zb = ZONES[REGIONS[b].zone].i;
   if(phase === "r2") return za === zb;
   if(phase === "r3") return Math.abs(za - zb) <= 1;
+  if(phase === "r4" || phase === "r5") return true;
   return false;
 }
+function isFar(a, b){ return REGIONS[a].zone !== REGIONS[b].zone; }
+function needsTranslator(me, other){ return isFar(me, other) && me !== "arabia"; }
 function whyNot(phase, a, b){
-  if(phase !== "r2" && phase !== "r3") return "Trading is closed";
+  if(!TRADE_PHASES.includes(phase)) return "Trading is closed";
   const za = ZONES[REGIONS[a].zone].i, zb = ZONES[REGIONS[b].zone].i;
   if(phase === "r2") return "Not in your zone";
   if(Math.abs(za-zb) > 1) return "Too far: trade through a Middle region";
@@ -377,7 +443,7 @@ function scoreRegion(d, r){
   }
   if(r === "persia"){
     const g = foreign.filter(c => K(c) === "goods").length; add(`Goods from afar count double (${g})`, g);
-    const t = tradeCount(d, "persia", "r3"); add(`Middle merchant: trades in Round 3 (${t})`, t);
+    const t = tradeCount(d, "persia", "r3") + tradeCount(d, "persia", "r4"); add(`Middle merchant: trades in Rounds 3 and 4 (${t})`, t);
   }
   if(r === "arabia"){
     const b = cards.filter(c => K(c) === "belief"); add(`Every belief card is worth 2 (${b.length})`, b.reduce((s,c) => s + (c.o === r ? 2 : 1), 0));
@@ -387,6 +453,8 @@ function scoreRegion(d, r){
   if(food < need) add(`Not enough food (${food} of ${need})`, -3);
   const kinds = new Set(cards.map(K));
   if(["food","goods","tech","belief"].every(k => kinds.has(k))) add("All four kinds of card", 2);
+  const wins = Object.values(d?.log || {}).filter(e => e.type === "battle" && e.winner === r).length;
+  add(`Battles won (${wins})`, wins);
   add(`Disease (${dis})`, -2 * dis);
   return {total, lines, food, need, foreign: foreign.length, disease: dis};
 }
@@ -418,6 +486,40 @@ function listGoods(keys){
   if(!keys || !keys.length) return "nothing";
   const m = {}; keys.forEach(g => m[g] = (m[g]||0) + 1);
   return Object.entries(m).map(([g,n]) => `${n} ${GOODS[g].name}`).join(", ");
+}
+
+function shuffle(a){ a = [...a]; for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; }
+function arHTML(g){ const w = AR[g]; return w ? `<span class="ar" lang="ar">${w[0]}</span> <i>(${esc(w[1])})</i>` : esc(GOODS[g].name); }
+function listGoodsAr(keys){
+  if(!keys || !keys.length) return "nothing";
+  const m = {}; keys.forEach(g => m[g] = (m[g]||0) + 1);
+  return Object.entries(m).map(([g,n]) => `${n} × ${arHTML(g)}`).join(", ");
+}
+function wordPool(){
+  const p = Object.entries(AR).filter(([k]) => k !== "disease").map(([k,[ar,tr]]) => ({ar, tr, en: GOODS[k].name}));
+  for(const r of Object.keys(LESSONS)) for(const [ar,tr,en] of LESSONS[r]) p.push({ar, tr, en});
+  return p;
+}
+function lessonRound(ph){ let r = null; for(const k of ["r1","r2","r3","r4","r5"]) if(pIdx(ph) >= pIdx(k)) r = k; return r; }
+function makeQuiz(target, dir){
+  const pool = shuffle(wordPool().filter(w => w.en !== target.en && w.ar !== target.ar));
+  const opts = shuffle([target, pool[0], pool[1]]);
+  return {dir, target, opts, correct: opts.indexOf(target)};
+}
+function quizTarget(goodsKeys, ph){
+  const g = shuffle(goodsKeys.filter(k => AR[k] && k !== "disease"))[0];
+  if(g) return {ar: AR[g][0], tr: AR[g][1], en: GOODS[g].name};
+  const words = LESSONS[lessonRound(ph) || "r1"];
+  const w = words[Math.floor(Math.random()*words.length)];
+  return {ar: w[0], tr: w[1], en: w[2]};
+}
+function battleQuestion(){
+  if(Math.random() < 0.5){
+    const [text, opts] = FACTS[Math.floor(Math.random()*FACTS.length)];
+    const sh = shuffle(opts); return {text, opts: sh, correct: sh.indexOf(opts[0])};
+  }
+  const pool = wordPool(), t = pool[Math.floor(Math.random()*pool.length)], q = makeQuiz(t, "toEn");
+  return {text: "What does this Arabic word mean?", ar: t.ar, tr: t.tr, opts: q.opts.map(o => o.en), correct: q.correct};
 }
 
 /* ============================ STORE ============================ */
@@ -479,11 +581,13 @@ function makeStore(mode, code){
   return api;
 }
 
+function serverTs(){ return S.mode === "firebase" ? {".sv":"timestamp"} : Date.now(); }
+
 /* ============================ APP STATE ============================ */
 const S = {
   mode: "firebase", code: null, role: null, region: null, store: null, data: undefined, view: "landing",
-  pendingRegion: null, conn: "", knownDisease: null,
-  ui: { partner: null, give: {}, want: {}, sneak: false, confirmRegion: null, minutes: 5, confirmReset: false, testMode: false, joinCode: "" }
+  pendingRegion: null, conn: "", knownDisease: null, seenLog: null, resolving: {},
+  ui: { partner: null, give: {}, want: {}, sneak: false, confirmRegion: null, minutes: 5, confirmReset: false, testMode: false, joinCode: "", quiz: null, decoded: {}, coolUntil: 0, translator: "" }
 };
 function setConn(c){ S.conn = c; const el = $("#conn"); if(el) el.outerHTML = connBadge(); }
 function connBadge(){
@@ -522,9 +626,21 @@ function onData(d){
       const mine = new Set(handOf(d, S.region).filter(c => c.g === "disease").map(c => c.id));
       if(S.knownDisease){ for(const id of mine) if(!S.knownDisease.has(id)) toast("Oh no! A disease card came with your last trade."); }
       S.knownDisease = mine;
+      const battles = Object.entries(d.log || {}).filter(([,e]) => e.type === "battle");
+      if(S.seenLog){
+        for(const [id,e] of battles){ if(S.seenLog.has(id) || (e.from !== S.region && e.to !== S.region)) continue;
+          const other = REGIONS[e.from === S.region ? e.to : e.from].name, item = e.g ? "1 " + GOODS[e.g].name : "nothing";
+          if(!e.winner) toast(`The battle with ${other} was a draw.`);
+          else if(e.winner === S.region) toast(`You won the battle against ${other} and took ${item}!`);
+          else toast(`You lost the battle. ${other} took ${item}.`, true);
+        }
+      }
+      S.seenLog = new Set(battles.map(([id]) => id));
     }
   }
+  if(d && S.region){ const ob = openBattleFor(d, S.region); if(ob && ob.id !== S.lastBattle){ S.lastBattle = ob.id; S.ui.scrollTo = ".quiz.battle"; } }
   render();
+  checkBattles();
 }
 async function claimRegion(r, force){
   const g = S.data?.groups?.[r];
@@ -565,12 +681,17 @@ function leave(){
 }
 
 /* ---- host actions ---- */
-async function nextPhase(){
-  const ph = S.data?.meta?.phase || "lobby", nx = PHASES[pIdx(ph) + 1];
+async function nextPhase(skip, jumpTo){
+  const ph = S.data?.meta?.phase || "lobby";
+  let i = pIdx(ph) + 1;
+  const u = {"meta/endsAt": 0};
+  if(jumpTo){ for(let k = i; k < pIdx(jumpTo); k++) if(ROUND_NO[PHASES[k]]) u[`meta/skipped/${PHASES[k]}`] = true; i = pIdx(jumpTo); }
+  else if(skip && ROUND_NO[PHASES[i]]){ u[`meta/skipped/${PHASES[i]}`] = true; i++; }
+  const nx = PHASES[i];
   if(!nx) return;
-  const u = {"meta/phase": nx, "meta/endsAt": 0};
-  if(nx === "r2" || nx === "r3") u["meta/endsAt"] = Date.now() + S.ui.minutes * 60000;
-  if(nx === "news2") u["tasks/china"] = "pending";
+  u["meta/phase"] = nx;
+  if(TRADE_PHASES.includes(nx)) u["meta/endsAt"] = Date.now() + S.ui.minutes * 60000;
+  if(pIdx(nx) >= pIdx("news2") && !S.data?.tasks?.china) u["tasks/china"] = "pending";
   try{ await S.store.update(u); }catch(e){ writeFail(e); }
 }
 async function setTimer(mins){ try{ await S.store.update({"meta/endsAt": mins ? Date.now() + mins*60000 : 0}); }catch(e){ writeFail(e); } }
@@ -593,12 +714,96 @@ async function sendOffer(){
   const give = pickIds(myCards, S.ui.give), want = pickIds(theirCards, S.ui.want);
   if(!give.length && !want.length) return toast("Choose at least one card to give or ask for.", true);
   const dis = S.ui.sneak ? (handOf(d, me).find(c => c.g === "disease")?.id || null) : null;
-  const id = Date.now().toString(36) + rid(4);
   const offer = {from: me, to, phase, ts: Date.now(), status: "open",
     give: Object.fromEntries(give.map(i => [i, true])), want: Object.fromEntries(want.map(i => [i, true]))};
   if(dis) offer.sneak = dis;
-  try{ await S.store.update({[`offers/${id}`]: offer}); resetBuilder(); toast(`Offer sent to ${REGIONS[to].name}.`); }
+  if(isFar(me, to)) offer.far = true;
+  if(needsTranslator(me, to)){
+    if(Date.now() < S.ui.coolUntil) return toast("Your Translator needs a moment. Try again soon.", true);
+    const goods = [...give.map(i => d.hands[me][i].g), ...want.map(i => d.hands[to][i].g)];
+    S.ui.quiz = {kind: "send", offer, ...makeQuiz(quizTarget(goods, phase), "toAr")};
+    S.ui.scrollTo = ".quiz"; render(); return;
+  }
+  writeOffer(offer);
+}
+async function writeOffer(offer){
+  const id = Date.now().toString(36) + rid(4);
+  try{ await S.store.update({[`offers/${id}`]: offer}); resetBuilder(); toast(`Offer sent to ${REGIONS[offer.to].name}.`); }
   catch(e){ writeFail(e); }
+}
+function startDecode(id){
+  const o = S.data?.offers?.[id]; if(!o) return;
+  if(Date.now() < S.ui.coolUntil) return toast("Your Translator needs a moment. Try again soon.", true);
+  const hands = S.data.hands || {};
+  const goods = Object.keys(o.give || {}).map(i => hands[o.from]?.[i]?.g).filter(Boolean);
+  const want = Object.keys(o.want || {}).map(i => hands[o.to]?.[i]?.g).filter(Boolean);
+  S.ui.quiz = {kind: "decode", offerId: id, ...makeQuiz(quizTarget(goods.length ? goods : want, o.phase), "toEn")};
+  S.ui.scrollTo = ".quiz"; render();
+}
+function answerQuiz(i){
+  const q = S.ui.quiz; if(!q) return;
+  S.ui.quiz = null;
+  if(i === q.correct){
+    if(q.kind === "send"){ toast(`Shukran! Your Translator got it right.`); writeOffer(q.offer); }
+    else { S.ui.decoded[q.offerId] = true; toast("Shukran! Offer translated."); }
+  } else {
+    S.ui.coolUntil = Date.now() + 10000;
+    toast(`Lost in translation! "${q.target.en}" is ${q.target.ar} (${q.target.tr}). Try again in 10 seconds.`, true);
+    setTimeout(render, 10100);
+  }
+  render();
+}
+
+/* ---- battles ---- */
+function openBattleFor(d, r){ return Object.entries(d.battles || {}).map(([id,b]) => ({id, ...b})).find(b => b.status === "open" && (b.from === r || b.to === r)); }
+function battlesStarted(d, r){ return Object.values(d.battles || {}).filter(b => b.from === r).length; }
+async function startBattle(target){
+  const d = S.data, me = S.region;
+  if(d.meta.phase !== "r5") return toast("Battles only happen in Round 5.", true);
+  if(battlesStarted(d, me) >= MAX_BATTLES) return toast("You have used all your battles.", true);
+  if(openBattleFor(d, me) || openBattleFor(d, target)) return toast("One of you is already in a battle. Wait for it to finish.", true);
+  const id = Date.now().toString(36) + rid(4);
+  try{ await S.store.update({[`battles/${id}`]: {from: me, to: target, created: Date.now(), status: "open", q: battleQuestion()}}); }
+  catch(e){ writeFail(e); }
+}
+async function answerBattle(id, i){
+  const b = S.data?.battles?.[id]; if(!b || b.status !== "open" || b.answers?.[S.region]) return;
+  try{ await S.store.update({[`battles/${id}/answers/${S.region}`]: {ok: i === b.q.correct, ts: serverTs(), pick: i}}); }
+  catch(e){ writeFail(e); }
+}
+function checkBattles(){
+  const d = S.data; if(!d || !d.battles) return;
+  for(const [id, b] of Object.entries(d.battles)){
+    if(b.status !== "open" || S.resolving[id]) continue;
+    const age = Date.now() - (b.created || 0), ans = b.answers || {};
+    const mine = S.role === "group" && b.from === S.region;
+    const host = S.role === "host" && age > BATTLE_MS + 10000;
+    if(!mine && !host) continue;
+    const ready = Object.values(ans).some(a => a.ok) || Object.keys(ans).length >= 2 || age > BATTLE_MS;
+    if(ready) resolveBattle(id);
+  }
+}
+async function resolveBattle(id){
+  S.resolving[id] = true;
+  try{
+    const b = await S.store.get(`battles/${id}`);
+    if(!b || b.status !== "open") return;
+    const hands = await S.store.get("hands") || {};
+    const correct = Object.entries(b.answers || {}).filter(([,a]) => a.ok).sort((x,y) => (x[1].ts||0) - (y[1].ts||0));
+    const u = {}, logId = `log/${Date.now().toString(36)}${rid(3)}`;
+    if(!correct.length){
+      u[`battles/${id}/status`] = "done"; u[`battles/${id}/winner`] = null;
+      u[logId] = {type:"battle", ts: Date.now(), phase:"r5", from: b.from, to: b.to, winner: null};
+    } else {
+      const winner = correct[0][0], loser = winner === b.from ? b.to : b.from;
+      const pool = Object.entries(hands[loser] || {}).filter(([,c]) => c.g !== "disease");
+      const pick = pool.length ? pool[Math.floor(Math.random()*pool.length)] : null;
+      if(pick){ u[`hands/${loser}/${pick[0]}`] = null; u[`hands/${winner}/${pick[0]}`] = pick[1]; }
+      u[`battles/${id}/status`] = "done"; u[`battles/${id}/winner`] = winner;
+      u[logId] = {type:"battle", ts: Date.now(), phase:"r5", from: b.from, to: b.to, winner, loser, g: pick ? pick[1].g : null};
+    }
+    await S.store.update(u);
+  }catch(e){ console.error(e); S.resolving[id] = false; }
 }
 async function respond(id, accept){
   const o = S.data?.offers?.[id]; if(!o || o.status !== "open") return;
@@ -630,6 +835,12 @@ async function payTax(cardId){
 /* ============================ VIEWS ============================ */
 function render(){
   const app = $("#app");
+  const ae = document.activeElement, fid = ae && ae.id && ae.tagName === "INPUT" ? ae.id : null, sel = fid ? [ae.selectionStart, ae.selectionEnd] : null;
+  renderInner(app);
+  if(fid){ const el = document.getElementById(fid); if(el){ el.focus(); try{ el.setSelectionRange(sel[0], sel[1]); }catch(e){} } }
+  if(S.ui.scrollTo){ const el = document.querySelector(S.ui.scrollTo); S.ui.scrollTo = null; if(el) el.scrollIntoView({block:"center", behavior:"auto"}); }
+}
+function renderInner(app){
   if(S.view === "landing") app.innerHTML = viewLanding();
   else if(S.data === undefined) app.innerHTML = `<div class="wrap"><p class="muted">Connecting to game ${esc(S.code)}… ${connBadge()}</p></div>`;
   else if(S.data === null) app.innerHTML = viewMissing();
@@ -644,7 +855,7 @@ function viewLanding(){
       <div class="eyebrow">A trading game for Grade 5</div>
       <h1>Silk Road Traders</h1>
       <div class="road" aria-hidden="true"></div>
-      <p>Six regions, three rounds, one long road. Trade food, goods, inventions and beliefs across Afro-Eurasia, and try not to catch anything on the way.</p>
+      <p>Six regions, five rounds, one long road. Trade food, goods, inventions and beliefs across Afro-Eurasia, learn some Arabic, and try not to catch anything on the way.</p>
     </div>
     <div class="choices">
       <section class="panel stack">
@@ -702,6 +913,7 @@ function cardHTML(st, me, qty){
     ${qty > 1 ? `<span class="qty">×${qty}</span>` : ""}
     <div class="body">
       <div class="name">${esc(G.name)}</div>
+      ${AR[st.g] ? `<div class="arw"><span class="ar" lang="ar">${AR[st.g][0]}</span><i>${esc(AR[st.g][1])}</i></div>` : ""}
       <div class="desc">${esc(G.desc)}</div>
       <div class="from">${glyph(G.kind)} ${KINDS[G.kind].label} · from ${REGIONS[st.o].name}</div>
     </div></div>`;
@@ -741,6 +953,45 @@ function viewGroup(){
       <div class="foot">${connBadge()} <span>Game ${esc(S.code)}</span> <button class="btn small" data-act="leave">Leave</button></div>
     </div>`;
 }
+function lessonHTML(r, heading){
+  if(!r || !LESSONS[r]) return "";
+  return `<div class="lesson"><div class="eyebrow">${heading || `Arabic words for Round ${ROUND_NO[r]}`}</div>
+    <div class="words">${LESSONS[r].map(([ar,tr,en]) => `<div class="word"><span class="ar" lang="ar">${ar}</span><i>${esc(tr)}</i><b>${esc(en)}</b></div>`).join("")}</div>
+    <span class="muted" style="font-size:.85rem">Say each word out loud together. Use them when you trade!</span></div>`;
+}
+function translatorName(){ return S.ui.translator || lsGet(`silkroad-translator-${S.code}-${S.region}`) || ""; }
+function quizHTML(){
+  const q = S.ui.quiz; if(!q) return "";
+  const who = translatorName() ? `Translator ${esc(translatorName())}` : "Translator";
+  const ask = q.dir === "toAr"
+    ? `${who}, how do you say <b>“${esc(q.target.en)}”</b> in Arabic?`
+    : `${who}, what does <span class="ar" lang="ar" style="font-size:1.5rem">${q.target.ar}</span> <i>(${esc(q.target.tr)})</i> mean?`;
+  return `<div class="quiz"><div class="eyebrow">${q.kind === "send" ? "Translate your offer" : "Translate their offer"}</div>
+    <div class="q">${ask}</div>
+    <div class="opts">${q.opts.map((o,i) => `<button class="opt" data-act="quiz" data-i="${i}">${q.dir === "toAr" ? `<span class="ar" lang="ar">${o.ar}</span> <i>(${esc(o.tr)})</i>` : esc(o.en)}</button>`).join("")}</div>
+    <div><button class="btn small" data-act="quizcancel">Cancel</button></div></div>`;
+}
+function battleHTML(d, me){
+  const b = openBattleFor(d, me); if(!b) return "";
+  const other = b.from === me ? b.to : b.from, mine = b.answers?.[me];
+  return `<div class="quiz battle"><div class="eyebrow" style="color:var(--bad)">Battle! ${REGIONS[b.from].name} attacks ${REGIONS[b.to].name}</div>
+    <div class="q">${esc(b.q.text)}${b.q.ar ? `<br><span class="ar" lang="ar" style="font-size:1.8rem">${b.q.ar}</span> <i>(${esc(b.q.tr)})</i>` : ""}</div>
+    ${mine ? `<p style="margin:0"><b>Answer locked in.</b> Waiting for ${REGIONS[other].name}… <span class="mono" data-bt="${b.created}"></span></p>`
+      : `<div class="opts">${b.q.opts.map((o,i) => `<button class="opt" data-act="battleans" data-id="${b.id}" data-i="${i}">${esc(o)}</button>`).join("")}</div>
+         <span class="muted" style="font-size:.85rem">First correct answer wins one of the other group's cards. <span class="mono" data-bt="${b.created}"></span></span>`}
+  </div>`;
+}
+function warHTML(d, me){
+  const used = battlesStarted(d, me), left = MAX_BATTLES - used, busy = !!openBattleFor(d, me);
+  const recent = Object.values(d.log || {}).filter(e => e.type === "battle" && (e.from === me || e.to === me)).sort((a,b) => b.ts - a.ts).slice(0, 4);
+  return `<div class="panel stack"><div class="eyebrow" style="color:var(--bad)">Go to battle</div>
+    <p style="margin:0">Battles left: <b>${left}</b> of ${MAX_BATTLES}. If you lose, the other group takes one of your cards!</p>
+    <div class="targets">${ORDER.filter(r => r !== me).map(r => `<button class="ptn" style="--rc:${rc(r)}" data-act="attack" data-r="${r}" ${left <= 0 || busy || openBattleFor(d, r) ? "disabled" : ""}><b>${REGIONS[r].name}</b><small>${openBattleFor(d, r) ? "In a battle" : "Attack"}</small></button>`).join("")}</div>
+    ${recent.length ? `<div class="stack" style="gap:6px">${recent.map(e => { const other = REGIONS[e.from === me ? e.to : e.from].name;
+      return `<div class="offer" style="--rc:${rc(e.from === me ? e.to : e.from)}"><span style="font-size:.9rem">${e.from === me ? "You attacked " + other : other + " attacked you"}</span>
+        <span class="status ${!e.winner ? "" : e.winner === me ? "accepted" : "declined"}">${!e.winner ? "Draw" : e.winner === me ? "You won" + (e.g ? " " + GOODS[e.g].name : "") : "You lost" + (e.g ? " " + GOODS[e.g].name : "")}</span></div>`; }).join("")}</div>` : ""}
+  </div>`;
+}
 function qList(qs){ return qs && qs.length ? `<ol class="qs">${qs.map(q => `<li>${esc(q)}</li>`).join("")}</ol>` : ""; }
 function sidePanel(d, me, ph){
   const info = PHASE_INFO[ph];
@@ -749,20 +1000,25 @@ function sidePanel(d, me, ph){
   if(ph === "r1") return `<div class="panel stack"><div class="eyebrow">Round 1</div><h2>Know your region</h2><p style="margin:0">${esc(info.text)}</p>
     <div><div class="eyebrow">Talk about it</div>${qList(info.q)}</div>
     <div><div class="eyebrow">How to score</div><ol class="qs">${RULES_TEXT.map(t => `<li>${esc(t)}</li>`).join("")}</ol></div>
-    <p class="muted" style="margin:0">Your secret disease card is in your hand. In Round 2 you can try to sneak it into a trade.</p></div>`;
-  if(ph === "r2" || ph === "r3") return tradePanel(d, me, ph);
-  if(ph === "news2") return newsCard(me, NEWS2[me], "News #2", info.q) + (me === "china" ? taxPanel(d) : "");
-  if(ph === "news3"){
-    const sc = scoreRegion(d, me);
-    return newsCard(me, NEWS3[me], "News #3", info.q, "Every disease card you hold: minus 2 points.") + scorePanel(sc);
-  }
+    <p class="muted" style="margin:0">Your secret disease card is in your hand. In Round 2 you can try to sneak it into a trade.</p></div>
+    <div class="panel stack"><div class="eyebrow">Choose your Translator</div>
+      <p style="margin:0">From Round 3, deals with far-away regions need a Translator who knows some Arabic. Your Translator answers the language challenges for your group.</p>
+      <label for="translatorName" class="muted" style="font-size:.85rem">Translator's first name (stays on this device)</label>
+      <input id="translatorName" class="codein" style="font:700 1.1rem var(--f-body);letter-spacing:0;text-transform:none;max-width:16em" maxlength="20" autocomplete="off" value="${esc(translatorName())}">
+    </div>
+    ${lessonHTML("r1")}`;
+  if(TRADE_PHASES.includes(ph)) return tradePanel(d, me, ph);
+  if(ph === "news2") return newsCard(me, NEWS2[me], "News #2", info.q) + (me === "china" ? taxPanel(d) : "") + lessonHTML(lessonRound(ph), "Practise your Arabic");
+  if(ph === "news3") return newsCard(me, {...NEWS3[me], effect: "At the end of the game: " + NEWS3[me].effect}, "News #3", info.q, "Every disease card you hold at the end: minus 2 points.") + lessonHTML(lessonRound(ph), "Practise your Arabic");
+  if(ph === "news4") return newsCard(me, NEWS4, "News #4", info.q) + lessonHTML("r5", "Arabic words for Round 5");
   if(ph === "final"){
     const sc = scoreRegion(d, me), ranking = ORDER.map(r => ({r, t: scoreRegion(d, r).total})).sort((a,b) => b.t - a.t);
     const pos = ranking.findIndex(x => x.r === me) + 1;
     return `<div class="panel stack"><div class="eyebrow">Final result</div>
       <div class="row" style="justify-content:space-between"><h2>Place ${pos} of 6</h2><span class="big-total">${sc.total}</span></div>
       ${scoreLines(sc)}</div>
-      <div class="panel stack"><div class="eyebrow">Wrapping up</div>${qList(info.q)}</div>`;
+      <div class="panel stack"><div class="eyebrow">Wrapping up</div>${qList(info.q)}</div>
+      <div class="lesson"><div class="eyebrow">Your Arabic phrasebook</div><div class="words">${Object.values(LESSONS).flat().map(([ar,tr,en]) => `<div class="word"><span class="ar" lang="ar">${ar}</span><i>${esc(tr)}</i><b>${esc(en)}</b></div>`).join("")}</div></div>`;
   }
   return "";
 }
@@ -816,23 +1072,33 @@ function tradePanel(d, me, ph){
   if(!partner) S.ui.partner = null;
   const hasDisease = handOf(d, me).some(c => c.g === "disease");
   const info = PHASE_INFO[ph];
+  const termsAr = o => {
+    const g = Object.keys(o.give || {}).map(i => (hands[o.from]?.[i] || hands[o.to]?.[i])?.g).filter(Boolean);
+    const w = Object.keys(o.want || {}).map(i => (hands[o.to]?.[i] || hands[o.from]?.[i])?.g).filter(Boolean);
+    return `<b>${REGIONS[o.from].name}</b> says: <b>${listGoodsAr(g)}</b> for your <b>${listGoodsAr(w)}</b>`;
+  };
+  const cooling = Date.now() < S.ui.coolUntil;
+  const eyebrow = {r2:"Round 2: trade inside your zone", r3:"Round 3: trade with next-door zones", r4:"Round 4: trade with anyone", r5:"Round 5: trade or go to battle"}[ph];
   return `
+  ${ph === "r5" ? battleHTML(d, me) : ""}
+  ${quizHTML()}
   ${incoming.length ? `<div class="panel stack"><div class="eyebrow">Offers for you (${incoming.length})</div>
-    ${incoming.map(o => `<div class="offer" style="--rc:${rc(o.from)}"><div class="terms">${terms(o, me)}</div>
-      <div class="row"><button class="btn primary small" data-act="accept" data-id="${o.id}">Accept</button><button class="btn small" data-act="decline" data-id="${o.id}">Say no</button></div></div>`).join("")}</div>` : ""}
+    ${incoming.map(o => { const locked = needsTranslator(me, o.from) && !S.ui.decoded[o.id];
+      return `<div class="offer" style="--rc:${rc(o.from)}"><div class="terms">${locked ? termsAr(o) : terms(o, me)}</div>
+      <div class="row">${locked ? `<button class="btn primary small" data-act="decode" data-id="${o.id}" ${cooling ? "disabled" : ""}>Translator: work it out</button>` : `<button class="btn primary small" data-act="accept" data-id="${o.id}">Accept</button>`}<button class="btn small" data-act="decline" data-id="${o.id}">Say no</button></div></div>`; }).join("")}</div>` : ""}
   <div class="panel stack">
-    <div class="eyebrow">${ph === "r2" ? "Round 2: trade inside your zone" : "Round 3: trade with next-door zones"}</div>
+    <div class="eyebrow">${eyebrow}</div>
     <h2>Make an offer</h2>
     <div class="partners">${ORDER.filter(r => r !== me).map(r => {
       const ok = canTrade(ph, me, r);
       return `<button class="ptn ${partner === r ? "on" : ""}" style="--rc:${rc(r)}" data-act="partner" data-r="${r}" ${ok ? "" : "disabled"}>
-        <b>${REGIONS[r].name}</b><small>${ok ? ZONES[REGIONS[r].zone].name + " zone" : esc(whyNot(ph, me, r))}</small></button>`; }).join("")}</div>
+        <b>${REGIONS[r].name}</b><small>${ok ? ZONES[REGIONS[r].zone].name + " zone" + (needsTranslator(me, r) ? " · Translator needed" : "") : esc(whyNot(ph, me, r))}</small></button>`; }).join("")}</div>
     ${partner ? `
       <div class="stack">
         <div><div class="eyebrow">You give</div>${pickerHTML(handOf(d, me).filter(c => c.g !== "disease"), S.ui.give, "give", me)}</div>
         <div><div class="eyebrow">You ask ${REGIONS[partner].name} for</div>${pickerHTML(handOf(d, partner).filter(c => c.g !== "disease"), S.ui.want, "want", me)}</div>
         ${hasDisease ? `<label class="switch" for="sneak"><input type="checkbox" id="sneak" ${S.ui.sneak ? "checked" : ""}><span><b>Sneak your disease card into this trade</b><br><span class="muted">${REGIONS[partner].name} won't see it until they accept.</span></span></label>` : ""}
-        <div class="row"><button class="btn primary" data-act="send">Send offer</button><button class="btn small" data-act="clear">Clear</button></div>
+        <div class="row"><button class="btn primary" data-act="send" ${cooling && needsTranslator(me, partner) ? "disabled" : ""}>${needsTranslator(me, partner) ? "Translate and send" : "Send offer"}</button><button class="btn small" data-act="clear">Clear</button></div>
       </div>` : `<p class="muted" style="margin:0">Pick a region to trade with. Talk to them face to face first, then send the offer you agreed.</p>`}
   </div>
   ${outgoing.length ? `<div class="panel stack"><div class="eyebrow">Waiting for an answer</div>
@@ -840,6 +1106,8 @@ function tradePanel(d, me, ph){
   ${done.length ? `<div class="panel stack"><div class="eyebrow">Recent deals</div>
     ${done.map(o => `<div class="offer" style="--rc:${rc(o.from === me ? o.to : o.from)}"><span class="muted" style="font-size:.85rem">${o.from === me ? "To " + REGIONS[o.to].name : "From " + REGIONS[o.from].name}</span>
       <span class="status ${o.status}">${{accepted:"Deal done",declined:"They said no",failed:"Could not happen",cancelled:"Taken back"}[o.status] || o.status}</span></div>`).join("")}</div>` : ""}
+  ${ph === "r5" ? warHTML(d, me) : ""}
+  ${lessonHTML(ph)}
   <div class="panel stack"><div class="eyebrow">Think about it</div>${qList(info.q)}</div>`;
 }
 
@@ -872,7 +1140,9 @@ function mapSVG(d){
 function feedHTML(d, reveal){
   const items = Object.values(d.log || {}).sort((a,b) => b.ts - a.ts);
   if(!items.length) return `<p class="muted" style="margin:0">Trades will appear here as they happen.</p>`;
-  return items.slice(0, 40).map(e => e.type === "tax"
+  return items.slice(0, 40).map(e => e.type === "battle"
+    ? `<div class="item" style="--rc:var(--bad)"><small>${PHASE_LABEL[e.phase]} · Battle</small><b>${REGIONS[e.from].name}</b> attacked <b>${REGIONS[e.to].name}</b>: ${!e.winner ? "a draw" : `${REGIONS[e.winner].name} won${e.g ? " and took 1 " + esc(GOODS[e.g].name) : ""}`}</div>`
+    : e.type === "tax"
     ? `<div class="item" style="--rc:var(--china)"><small>${PHASE_LABEL[e.phase]}</small>China paid the emperor 1 ${esc(GOODS[e.give[0]].name)} in tax</div>`
     : `<div class="item" style="--rc:var(--${e.from})"><small>${PHASE_LABEL[e.phase]}</small><b>${REGIONS[e.from].name}</b> → <b>${REGIONS[e.to].name}</b>: ${esc(listGoods(e.give))} for ${esc(listGoods(e.want))}${reveal && e.disease ? ` <b style="color:var(--bad)">+ disease</b>` : ""}</div>`).join("");
 }
@@ -882,11 +1152,11 @@ function viewHost(){
   const hosted = /^https?:$/.test(location.protocol) && !/srcdoc/.test(location.href);
   const url = hosted ? location.origin + location.pathname : "the web address where you put this game";
   const reveal = ph === "final";
-  const trade = ph === "r2" || ph === "r3";
+  const trade = TRADE_PHASES.includes(ph);
   let lower = "";
-  if(ph === "final" || ph === "news3"){
+  if(ph === "final"){
     const board = ORDER.map(r => ({r, sc: scoreRegion(d, r)})).sort((a,b) => b.sc.total - a.sc.total);
-    lower = `<section class="panel stack"><div class="eyebrow">${ph === "final" ? "Final scores" : "Scores (shown on each group's screen)"}</div>
+    lower = `<section class="panel stack"><div class="eyebrow">Final scores</div>
       <div class="board">${board.map((x,i) => `<div class="line" style="--rc:${rc(x.r)}"><span class="rank">${i+1}</span>
         <details><summary>${REGIONS[x.r].name}</summary>${scoreLines(x.sc)}</details><span class="tot">${x.sc.total}</span></div>`).join("")}</div></section>`;
     if(ph === "final"){
@@ -896,6 +1166,9 @@ function viewHost(){
         <p class="muted" style="margin:0">Diseases like the plague really did travel along the Silk Roads with merchants and their goods.</p></section>`;
     }
   }
+  if(ph === "news4") lower = `<section class="panel stack"><div class="eyebrow">News for everyone</div><h2>${esc(NEWS4.title)}</h2><p style="margin:0">${esc(NEWS4.story)}</p><p class="effect" style="margin:0">${esc(NEWS4.effect)}</p></section>`;
+  if(ph === "r5"){ const open = Object.values(d.battles || {}).filter(b => b.status === "open");
+    if(open.length) lower = `<section class="panel stack"><div class="eyebrow" style="color:var(--bad)">Battles happening now</div>${open.map(b => `<div class="item"><b>${REGIONS[b.from].name}</b> vs <b>${REGIONS[b.to].name}</b>: ${esc(b.q.text)} ${b.q.ar ? `<span class="ar" lang="ar">${b.q.ar}</span>` : ""}</div>`).join("")}</section>`; }
   if(ph === "news2" || ph === "news3"){
     const N = ph === "news2" ? NEWS2 : NEWS3;
     lower = `<section class="panel stack"><div class="eyebrow">This round's news</div><div class="rstat">${ORDER.map(r => `<div class="r" style="--rc:${rc(r)}"><b>${REGIONS[r].name}: ${esc(N[r].title)}</b>${esc(N[r].effect)}${ph === "news2" && r === "china" ? `<br><span class="chip">${d.tasks?.china === "done" ? "Tax paid" : "Tax not paid yet"}</span>` : ""}</div>`).join("")}</div></section>` + lower;
@@ -907,11 +1180,11 @@ function viewHost(){
       <span class="timer" data-timer></span>
     </div></header>
     <div class="wrap stack">
-      <div class="steps">${PHASES.map((p,i) => `<span class="${p === ph ? "now" : i < pIdx(ph) ? "done" : ""}">${PHASE_LABEL[p]}</span>`).join("")}</div>
+      <div class="steps">${PHASES.map((p,i) => `<span class="${p === ph ? "now" : d.meta?.skipped?.[p] ? "skipped" : i < pIdx(ph) ? "done" : ""}">${PHASE_LABEL[p]}</span>`).join("")}</div>
       <div class="hgrid">
         <div class="stack">
           <section class="panel mapbox">${mapSVG(d)}</section>
-          <p class="muted" style="margin:0;font-size:.85rem">Circles show how many cards each region has from other regions. ${trade ? "Dotted lines show who can trade this round." : ""}</p>
+          <p class="muted" style="margin:0;font-size:.85rem">Circles show how many cards each region has from other regions. ${ph === "r2" || ph === "r3" ? "Dotted lines show who can trade this round." : ph === "r4" || ph === "r5" ? "Every region can trade with every other region this round." : ""}</p>
           <section class="panel stack"><div class="eyebrow">Regions</div><div class="rstat">${ORDER.map(r => { const s = liveStats(d, r);
             return `<div class="r" style="--rc:${rc(r)}"><b>${REGIONS[r].name}</b>${groups[r] ? "Joined" : "<span class='muted'>Not joined</span>"}<br>${s.total} cards · food ${s.food}/${s.need}</div>`; }).join("")}</div></section>
           ${lower}
@@ -921,11 +1194,15 @@ function viewHost(){
             <p style="margin:0">${esc(info.text)}</p>
             ${ph === "lobby" ? `<p style="margin:0">Groups go to <b class="mono" style="overflow-wrap:anywhere">${esc(url)}</b> and type <b class="mono">${esc(S.code)}</b>.</p><p class="muted" style="margin:0">${joinedN} of 6 regions joined.</p>` : ""}
             ${info.q ? `<div><div class="eyebrow">Class questions</div>${qList(info.q)}</div>` : ""}
-            ${info.next ? `<div><button class="btn primary" data-act="next">${esc(info.next)}</button></div>` : ""}
+            ${info.next ? `<div class="row"><button class="btn primary" data-act="next">${esc(info.next)}</button>
+              ${ROUND_NO[PHASES[pIdx(ph)+1]] ? `<button class="btn small" data-act="skip">Skip Round ${ROUND_NO[PHASES[pIdx(ph)+1]]}</button>` : ""}
+              ${ph !== "lobby" && ph !== "r5" ? `<button class="btn small" data-act="jumpend">Jump to results</button>` : ""}</div>
+              ${ROUND_NO[PHASES[pIdx(ph)+1]] ? `<p class="muted" style="margin:0;font-size:.85rem">Short on time? Skip Round ${ROUND_NO[PHASES[pIdx(ph)+1]]} to go straight to the news after it.</p>` : ""}` : ""}
             <div class="row"><label for="mins" class="muted" style="font-size:.85rem">Trading time</label>
               <select id="mins" class="btn small">${[3,4,5,6,8,10].map(m => `<option value="${m}" ${S.ui.minutes == m ? "selected" : ""}>${m} min</option>`).join("")}</select>
               ${trade ? `<button class="btn small" data-act="timer">Restart timer</button><button class="btn small" data-act="timeroff">Stop timer</button>` : ""}</div>
           </section>
+          ${lessonRound(ph) && ph !== "final" ? lessonHTML(lessonRound(ph), `Say it together: Arabic for Round ${ROUND_NO[lessonRound(ph)]}`) : ""}
           <section class="panel stack"><div class="eyebrow">Trade feed</div><div class="feed">${feedHTML(d, reveal)}</div></section>
           ${S.mode === "local" ? `<section class="panel stack"><div class="eyebrow">Test mode: open each group in a new tab</div><div class="row">${ORDER.map(r => `<a class="btn small" target="_blank" rel="noopener" href="?game=${S.code}&local=1&region=${r}">${REGIONS[r].name}</a>`).join("")}</div></section>` : ""}
           <div class="foot">${connBadge()}
@@ -940,13 +1217,17 @@ function viewHost(){
 function tick(){
   const end = S.data?.meta?.endsAt || 0, ph = S.data?.meta?.phase;
   document.querySelectorAll("[data-timer]").forEach(el => {
-    if(!end || !(ph === "r2" || ph === "r3")){ el.textContent = ""; return; }
+    if(!end || !TRADE_PHASES.includes(ph)){ el.textContent = ""; return; }
     const left = Math.max(0, Math.round((end - Date.now())/1000));
     el.textContent = left ? `${Math.floor(left/60)}:${String(left%60).padStart(2,"0")}` : "Time's up";
     el.classList.toggle("out", left === 0);
   });
 }
-setInterval(tick, 1000);
+function battleTick(){
+  document.querySelectorAll("[data-bt]").forEach(el => { const left = Math.max(0, Math.ceil((+el.dataset.bt + BATTLE_MS - Date.now())/1000)); el.textContent = left ? `${left}s left` : "Time's up"; });
+  checkBattles();
+}
+setInterval(() => { tick(); battleTick(); }, 1000);
 
 /* ============================ EVENTS ============================ */
 document.addEventListener("click", e => {
@@ -957,7 +1238,7 @@ document.addEventListener("click", e => {
     case "check": checkConnection(); break;
     case "leave": leave(); break;
     case "claim": claimRegion(b.dataset.r); break;
-    case "next": nextPhase(); break;
+    case "next": nextPhase(false); break;
     case "timer": setTimer(S.ui.minutes); break;
     case "timeroff": setTimer(0); break;
     case "askreset": S.ui.confirmReset = true; render(); break;
@@ -974,6 +1255,13 @@ document.addEventListener("click", e => {
     case "decline": respond(b.dataset.id, false); break;
     case "cancel": cancelOffer(b.dataset.id); break;
     case "tax": payTax(b.dataset.id); break;
+    case "skip": nextPhase(true); break;
+    case "jumpend": nextPhase(false, "final"); break;
+    case "quiz": answerQuiz(+b.dataset.i); break;
+    case "quizcancel": S.ui.quiz = null; render(); break;
+    case "decode": startDecode(b.dataset.id); break;
+    case "attack": startBattle(b.dataset.r); break;
+    case "battleans": answerBattle(b.dataset.id, +b.dataset.i); break;
   }
 });
 document.addEventListener("change", e => {
@@ -981,7 +1269,10 @@ document.addEventListener("change", e => {
   if(e.target.id === "sneak") S.ui.sneak = e.target.checked;
   if(e.target.id === "mins") S.ui.minutes = +e.target.value;
 });
-document.addEventListener("input", e => { if(e.target.id === "joinCode") S.ui.joinCode = e.target.value.toUpperCase(); });
+document.addEventListener("input", e => {
+  if(e.target.id === "joinCode") S.ui.joinCode = e.target.value.toUpperCase();
+  if(e.target.id === "translatorName"){ S.ui.translator = e.target.value; lsSet(`silkroad-translator-${S.code}-${S.region}`, e.target.value); }
+});
 document.addEventListener("submit", e => {
   if(e.target.id !== "joinForm") return;
   e.preventDefault();
@@ -1022,7 +1313,7 @@ async function checkConnection(){
   }
   render();
 })();
-window.__silk = {S, scoreRegion, dealHands, canTrade};
+window.__silk = {S, scoreRegion, dealHands, canTrade, nextPhase};
 </script>
 </body>
 </html>

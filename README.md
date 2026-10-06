@@ -32,19 +32,31 @@ It is hosted on GitHub Pages from this repo. Open the page, leave Test mode off 
 ## 4. In class
 1. Teacher: open the page, click **Create game** and project the screen.
 2. Each group: open the same page on one device, type the code and pick its region.
-3. Teacher: press the big button to move through the game: Round 1 → Round 2 → News #2 → Round 3 → News #3 → Results.
+3. Teacher: press the big button to move through the game. Short on time? Use **Skip Round N** or **Jump to results**.
 
-Groups agree on deals out loud first. Then one group sends the offer on its device and the other group accepts it. The app handles who can trade with whom, the hidden disease cards, the news cards and the scoring.
+| Step | What happens |
+|---|---|
+| Round 1 | Know your region. No trading. Choose a Translator. |
+| Round 2 | Trade inside your zone. |
+| News #2 | Each region's news card (China pays tax). |
+| Round 3 | Trade with next-door zones. Translator needed for other zones. |
+| News #3 | News cards that change end-of-game scoring. |
+| Round 4 | Trade with anyone. Translator needed for far regions. |
+| News #4 | War comes to the Silk Roads. |
+| Round 5 | Trade or battle. Up to 3 battles per group. |
+| Results | Scores, disease trail, Arabic phrasebook. |
+
+### Arabic and the Translator
+Every card shows its Arabic word and how to say it. Each round adds new words (hello, thank you, numbers, trader, war, peace...).
+For deals with another zone, the Translator must pick the right Arabic word before an offer is sent, and must work out the Arabic in an offer from far away before it can be accepted. A wrong answer means a 10-second wait. Arabia speaks Arabic already, so it never needs a challenge.
+
+### Battles (Round 5)
+A group picks a region to attack. Both groups get the same question (Arabic word or Silk Road fact). The first correct answer wins one random card from the other group, and each battle won is worth 1 point. If nobody is right in 30 seconds, it is a draw.
 
 ## Changes from the original activity
 - **Trade zones:** West = Byzantium + Arabia, Middle = Persia + India, East = Central Asia + China.
-- **Round 1:** no trading. Groups explore their cards instead, because each group shares one device.
-- **Cards:** 12 cards per region, sorted into four kinds: food, goods, technology and belief. Wording is simplified for Grade 5.
+- **Five rounds** instead of three, with Arabic language, Translators and battles added.
+- **Cards:** 12 cards per region, sorted into food, goods, technology and belief, with simple wording for Grade 5.
 - **Card swaps:** wine became grapes, and ammonium chloride became "Metalwork salts".
 - **Arabia:** starts with no food, so it has to trade for some.
-- **Scoring:**
-  - +1 for each card from another region.
-  - +2 for holding all four kinds of card.
-  - You need 2 food cards (3 for Central Asia and India after News #2), or you lose 3 points.
-  - −2 for each disease card.
-  - The news cards change some of these rules.
+- **Scoring:** +1 per card from another region, +2 for all four kinds, food needed (2, or 3 for Central Asia and India after News #2) or −3, −2 per disease card, +1 per battle won. News cards change some rules.
